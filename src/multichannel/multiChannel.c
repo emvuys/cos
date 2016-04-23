@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../files/filetype.h"
-#include "../files/fileSystem.h"
+#include "../filesystem/filetype.h"
+#include "../filesystem/fileSystem.h"
 #include "../inc/types.h"
 
 int getAvailableChannel(){
