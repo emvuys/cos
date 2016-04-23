@@ -25,7 +25,7 @@ typedef int s4;
 #endif
 
 #ifdef DEBUG_LEVEL2
-#defile DEBUG_LEVEL1
+#define DEBUG_LEVEL1
 #endif
 
 
