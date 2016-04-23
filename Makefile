@@ -10,7 +10,7 @@ AR = ar
 FLAGS = 
 
 #src-y = src/vcos-logic.c
-src-y = $(wildcard src/commandprocess/*.c) $(wildcard src/multichannel/*.c) $(wildcard src/files/*.c)
+src-y = $(wildcard src/commandprocess/*.c) $(wildcard src/multichannel/*.c) $(wildcard src/filesystem/*.c)
 #${info ${src-y}}
 
 obj-y = $(patsubst %.c, %.o, ${src-y})
@@ -27,7 +27,7 @@ build: libvcos.a
 libvcos.a: ${obj-y}
 #	echo $^
 	${AR} -rcv $@ $^
-	cp libvcos.a ../../testvcos/
+	cp libvcos.a ../../cosTest/
 	
 clean:
 	@find . -name "*.o" -exec rm {} \;
