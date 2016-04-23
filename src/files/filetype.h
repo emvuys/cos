@@ -68,7 +68,7 @@ typedef struct ArrRef{
 
 typedef struct FileList{
 	struct FileDesc *me;
-	struct FileDesc *next;
+	struct FileList *next;
 }FileList;
 
 typedef struct FileDesc{

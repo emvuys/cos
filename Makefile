@@ -27,7 +27,7 @@ build: libvcos.a
 libvcos.a: ${obj-y}
 #	echo $^
 	${AR} -rcv $@ $^
-#	cp libvcos.a ../testvcos/
+	cp libvcos.a ../../testvcos/
 	
 clean:
 	@find . -name "*.o" -exec rm {} \;

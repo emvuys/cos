@@ -1,32 +1,33 @@
 #include <stdio.h>
-
-void processSelect(char* apdu);
-void processManageChannel(char* apdu);
+#include <stdlib.h>
+#include "../files/filetype.h"
+#include "../files/fileSystem.h"
+#include "../inc/types.h"
 
 void dispatcher(char* apdu) {
-    unsigned char ins = apdu[1];
-	
-	printf("dispatcher\n");
+	unsigned char ins = apdu[1];
 
-    switch(ins) {
-        case 0xA4:
-            processSelect(apdu);
-            break;
-        case 0x70:
-            processManageChannel(apdu);
-            break;
-        default:
-			printf("Unkown command\n");
-            break;
-    }
+	PRINT_FUNC_NAME();
+
+	switch(ins) {
+		case 0xA4:
+			processSelect(apdu);
+			break;
+		case 0x70:
+			processManageChannel(apdu);
+			break;
+		default:
+			PRINT_STR("Unkown command");
+			break;
+	}
 }
 
 
 void processSelect(char* apdu){
-	printf("processSelect\n");
+	PRINT_FUNC_NAME();
 }
 
 void processManageChannel(char* apdu){
-	printf("processManageChannel\n");
+	PRINT_FUNC_NAME();
 }
 

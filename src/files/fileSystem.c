@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "filetype.h"
 #include "fileSystem.h"
+#include "../inc/types.h"
 
 u2 EFs_ACCESS[] = {
 	EF_Kc, 
@@ -51,30 +52,34 @@ u2 EFs_ADF_USIM[] = {
 	
 FileDesc* buildFileSystem() {
 	FileDesc *mf, *teleDF, *adf, *phoneBook, *accessDF;
+
+	PRINT_FUNC_NAME();
+
 	mf = buildDFADF(DF_MF);
 	
 	teleDF = buildDFADF(DF_TELECOM);
-	addChildDF(mf->childDf, teleDF);
+	addChildFile(&(mf->childDf), teleDF);
 	
 	adf = buildDFADF(ADF_USIM);
-	addChildDF(mf->childDf, adf);
+	addChildFile(&(mf->childDf), adf);
 
 	phoneBook = buildDFADF(DF_PHONEBOOK);
-	addChildDF(adf->childDf, phoneBook);
-	addChildDF(teleDF->childDf, phoneBook);
+	addChildFile(&(adf->childDf), phoneBook);
+	addChildFile(&(teleDF->childDf), phoneBook);
 
 	accessDF = buildDFADF(DF_GSM_ACCESS);
-	addChildDF(adf->childDf, accessDF);
+	addChildFile(&(adf->childDf), accessDF);
 
-	addChildEF(mf->childEf, EFs_MF, sizeof(EFs_MF) / 2);
-	addChildEF(adf->childEf, EFs_ADF_USIM, sizeof(EFs_ADF_USIM) / 2);
-	addChildEF(teleDF->childEf, EFs_TELECOM, sizeof(EFs_TELECOM) / 2);
-	addChildEF(accessDF->childEf, EFs_ACCESS, sizeof(EFs_ACCESS) / 2);
+	addChildEFs(&(mf->childEf), EFs_MF, sizeof(EFs_MF) / 2);
+	addChildEFs(&(adf->childEf), EFs_ADF_USIM, sizeof(EFs_ADF_USIM) / 2);
+	addChildEFs(&(teleDF->childEf), EFs_TELECOM, sizeof(EFs_TELECOM) / 2);
+	addChildEFs(&(accessDF->childEf), EFs_ACCESS, sizeof(EFs_ACCESS) / 2);
 	return mf;
 }
 
 FileDesc* buildDFADF(u2 fid) {
 	FileDesc* df;
+	PRINT_FUNC_NAME();
 	switch (fid) {
 		case DF_MF:
 			df = buildDF_MF();
@@ -99,8 +104,10 @@ FileDesc* buildDFADF(u2 fid) {
 
 
 FileDesc* buildDF_MF() {
-	FileDesc* mf = malloc(sizeof(FileDesc));
-	FileDesc* df;
+	FileDesc* mf = COS_MALLOC(sizeof(FileDesc));
+	PRINT_FUNC_NAME();
+	
+	COS_MEMSET(mf, 0, sizeof(FileDesc));
 	mf->fid = 0x3F00;
 	mf->arrRef.arrFid = 0x2F06;
 	mf->arrRef.arrFid = 1;
@@ -110,35 +117,138 @@ FileDesc* buildDF_MF() {
 }
 
 FileDesc* buildDF_TELECOM() {
-	FileDesc* df;
-
+	FileDesc* df = COS_MALLOC(sizeof(FileDesc));
+	PRINT_FUNC_NAME();
+	
+	COS_MEMSET(df, 0, sizeof(FileDesc));
+	df->fid = DF_TELECOM;
+	df->arrRef.arrFid = 0x2F06;
+	df->arrRef.arrFid = 1;
+	df->filetype = DF;
 	return df;
 }
 
 FileDesc* buildDF_GSM_ACCESS() {
-	FileDesc* df;
-
+	FileDesc* df = COS_MALLOC(sizeof(FileDesc));
+	PRINT_FUNC_NAME();
+	
+	COS_MEMSET(df, 0, sizeof(FileDesc));
+	df->fid = DF_GSM_ACCESS;
+	df->arrRef.arrFid = 0x2F06;
+	df->arrRef.arrFid = 1;
+	df->filetype = DF;
 	return df;
 }
 
 FileDesc* buildDF_PHONEBOOK() {
-	FileDesc* df;
-
+	FileDesc* df = COS_MALLOC(sizeof(FileDesc));
+	PRINT_FUNC_NAME();
+	
+	COS_MEMSET(df, 0, sizeof(FileDesc));
+	df->fid = DF_PHONEBOOK;
+	df->arrRef.arrFid = 0x2F06;
+	df->arrRef.arrFid = 1;
+	df->filetype = DF;
 	return df;
 }
 
 FileDesc* buildADF_USIM() {
-	FileDesc* df;
-
+	FileDesc* df = COS_MALLOC(sizeof(FileDesc));
+	PRINT_FUNC_NAME();
+	
+	COS_MEMSET(df, 0, sizeof(FileDesc));
+	df->fid = ADF_USIM;
+	df->arrRef.arrFid = 0x2F06;
+	df->arrRef.arrFid = 1;
+	df->filetype = ADF;
 	return df;
 }
 
-
-void addChildDF(FileList* pfileList, FileDesc* file) {
-	return;
+void addChildEFs(FileList** pfileList, u2* fids, u2 len) {
+	PRINT_FUNC_NAME();
+#ifdef DEBUG_LEVEL2
+	printf("fid num: %d\n", len);
+#endif	
+	buildEFs(pfileList,  fids, len);
 }
 
-void addChildEF(FileList* pfileList, u2* fids, u2 len) {
-	return;
+void addChildFile(FileList** pfileList, FileDesc* file) {
+	FileList* p, *pNew;
+	PRINT_FUNC_NAME();
+	
+	if(*pfileList == NULL) {
+		PRINT_STR("pfileList is NULL");
+		pNew = COS_MALLOC(sizeof(FileList));
+#ifdef DEBUG_LEVEL2		
+		printf("COS_MALLOC addr[0x%4X]======\n", (int)pNew);
+#endif		
+		COS_MEMSET(pNew, 0, sizeof(FileList));
+		pNew->me = file;
+		pNew->next = NULL;
+		*pfileList = pNew;
+	}
+	else {
+		PRINT_STR("pfileList is NOT NULL");
+		p = *pfileList;
+#ifdef DEBUG_LEVEL2		
+		printf("pfileList addr[0x%4X], fid[0x%02X]======\n", (int)p, p->me->fid);
+#endif
+		while(p->next!= NULL) {
+#ifdef DEBUG_LEVEL2
+			printf("pfileList addr next[0x%4X], fid[0x%02X]======\n", (int)(p->next), p->me->fid);
+#endif
+			p = p->next;
+		}
+		pNew = COS_MALLOC(sizeof(FileList));
+#ifdef DEBUG_LEVEL2		
+		printf("COS_MALLOC addr[0x%4X]======\n", (int)pNew);
+#endif
+		COS_MEMSET(pNew, 0, sizeof(FileList));
+		pNew->me = file;
+		pNew->next = NULL;
+		p->next = pNew;
+	}
+}
+
+void showFileSystem(FileDesc* mf) {
+
+	PRINT_FUNC_NAME();
+
+	if(mf == NULL) {
+		PRINT_STR("MF is NULL");
+	}
+
+	PRINTGG();
+	if(mf->childDf != NULL) {
+		showChildDFEF(mf->childDf);
+	}
+	PRINTGG();
+
+	if(mf->childEf != NULL) {
+		showChildDFEF(mf->childEf);
+	}
+	PRINTGG();
+
+}
+
+void showChildDFEF(FileList* fileList) {
+	FileDesc* pFile;
+	FileList* pListNode = fileList;
+
+	//PRINT_FUNC_NAME();
+	
+	while(pListNode != NULL) {
+		pFile = pListNode->me;
+		printf("fid: 0x%2X, type: %d\n", pFile->fid, pFile->filetype);
+		if((pListNode->me->filetype == DF) || (pListNode->me->filetype == ADF)) {
+			if(pListNode->me->childDf != NULL) {
+				showChildDFEF(pListNode->me->childDf);
+			}
+			if(pListNode->me->childEf != NULL) {
+				showChildDFEF(pListNode->me->childEf);
+			}
+		}
+		pListNode = pListNode->next;
+	}
 }
 
