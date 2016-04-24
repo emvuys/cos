@@ -51,29 +51,30 @@ u2 EFs_ADF_USIM[] = {
 
 	
 FileDesc* buildFileSystem() {
-	FileDesc *mf, *teleDF, *adf, *phoneBook, *accessDF;
+	FileDesc *mf, *teleDF, *adf, *phoneBook, *accessDF, *phoneBook_adf, *phoneBook_teleDF;
 
 	PRINT_FUNC_NAME();
 
 	mf = buildDFADF(DF_MF);
 	
 	teleDF = buildDFADF(DF_TELECOM);
-	addChildFile(&(mf->childDf), teleDF);
+	addChildFile(mf, teleDF, DF);
 	
 	adf = buildDFADF(ADF_USIM);
-	addChildFile(&(mf->childDf), adf);
+	addChildFile(mf, adf, DF);
 
-	phoneBook = buildDFADF(DF_PHONEBOOK);
-	addChildFile(&(adf->childDf), phoneBook);
-	addChildFile(&(teleDF->childDf), phoneBook);
+	phoneBook_adf = buildDFADF(DF_PHONEBOOK);
+	addChildFile(adf, phoneBook_adf, DF);
+	phoneBook_teleDF = buildDFADF(DF_PHONEBOOK);
+	addChildFile(teleDF, phoneBook_teleDF, DF);
 
 	accessDF = buildDFADF(DF_GSM_ACCESS);
-	addChildFile(&(adf->childDf), accessDF);
+	addChildFile(adf, accessDF, DF);
 
-	addChildEFs(&(mf->childEf), EFs_MF, sizeof(EFs_MF) / 2);
-	addChildEFs(&(adf->childEf), EFs_ADF_USIM, sizeof(EFs_ADF_USIM) / 2);
-	addChildEFs(&(teleDF->childEf), EFs_TELECOM, sizeof(EFs_TELECOM) / 2);
-	addChildEFs(&(accessDF->childEf), EFs_ACCESS, sizeof(EFs_ACCESS) / 2);
+	addChildEFs(mf, EFs_MF, sizeof(EFs_MF) / 2);
+	addChildEFs(adf, EFs_ADF_USIM, sizeof(EFs_ADF_USIM) / 2);
+	addChildEFs(teleDF, EFs_TELECOM, sizeof(EFs_TELECOM) / 2);
+	addChildEFs(accessDF, EFs_ACCESS, sizeof(EFs_ACCESS) / 2);
 	return mf;
 }
 
@@ -164,17 +165,25 @@ FileDesc* buildADF_USIM() {
 	return df;
 }
 
-void addChildEFs(FileList** pfileList, u2* fids, u2 len) {
+void addChildEFs(FileDesc* parent, u2* fids, u2 len) {
 	PRINT_FUNC_NAME();
 #ifdef DEBUG_LEVEL2
 	printf("fid num: %d\n", len);
 #endif	
-	buildEFs(pfileList,  fids, len);
+	buildEFs(parent,  fids, len);
 }
 
-void addChildFile(FileList** pfileList, FileDesc* file) {
-	FileList* p, *pNew;
+void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
+	FileList* p, *pNew, **pfileList;
 	PRINT_FUNC_NAME();
+
+	file->parent = parent;
+	
+	if(fileType == EF) {
+		pfileList = &(parent->childEf);
+	} else if(fileType == DF) {
+		pfileList = &(parent->childDf);
+	}
 	
 	if(*pfileList == NULL) {
 		PRINT_STR("pfileList is NULL");
@@ -217,16 +226,26 @@ void showFileSystem(FileDesc* mf) {
 	if(mf == NULL) {
 		PRINT_STR("MF is NULL");
 	}
-
+	
 	PRINTGG();
 	if(mf->childDf != NULL) {
+		
 		showChildDFEF(mf->childDf);
 	}
+	else {
+		PRINT_STR("childDf is NULL");
+	}
+
 	PRINTGG();
 
 	if(mf->childEf != NULL) {
+		
 		showChildDFEF(mf->childEf);
 	}
+	else {
+		PRINT_STR("childEf is NULL");
+	}
+
 	PRINTGG();
 
 }
@@ -239,7 +258,13 @@ void showChildDFEF(FileList* fileList) {
 	
 	while(pListNode != NULL) {
 		pFile = pListNode->me;
-		printf("fid: 0x%2X, type: %d\n", pFile->fid, pFile->filetype);
+		printf("fid: 0x%2X, type: %d, ", pFile->fid, pFile->filetype);
+		if(pFile->parent != NULL) {
+			printf("parentfid: 0x%2X, type: %d\n", pFile->parent->fid, pFile->parent->filetype);
+		}
+		else {
+			printf("parent is NULL\n");
+		}
 		if((pListNode->me->filetype == DF) || (pListNode->me->filetype == ADF)) {
 			if(pListNode->me->childDf != NULL) {
 				showChildDFEF(pListNode->me->childDf);

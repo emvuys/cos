@@ -5,7 +5,7 @@
 
 
 
-FileDesc* buildEFs(FileList** pfileList, u2* fids, u1 len) {
+FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 	u2 fid;
 	u1 index = 0;
 	FileDesc* ef = NULL;
@@ -16,7 +16,7 @@ FileDesc* buildEFs(FileList** pfileList, u2* fids, u1 len) {
 	
 	do{
 		fid = fids[index];
-#ifdef DEBUG_LEVEL1		
+#ifdef DEBUG_LEVEL2		
 		printf("fid[0x%2x], idx: %d\n", fid, index);
 #endif
 		switch (fid) {
@@ -119,11 +119,8 @@ FileDesc* buildEFs(FileList** pfileList, u2* fids, u1 len) {
 			default:
 				break;
 		}
-#ifdef DEBUG_LEVEL2		
-		printf("pfileList addr[0x%4X]======\n", (int)*pfileList);
-#endif
 		if(ef != NULL) {
-			addChildFile(pfileList, ef);
+			addChildFile(parent, ef, EF);
 		}
 	}while(index ++ < (len - 1));
 }

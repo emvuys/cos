@@ -9,9 +9,9 @@ extern FileDesc* buildDF_GSM_ACCESS();
 extern FileDesc* buildDF_PHONEBOOK();
 extern FileDesc* buildADF_USIM();
 
-void addChildFile(FileList** pfileList, FileDesc* file);
-void addChildEFs(FileList** pfileList, u2* fids, u2 len);
-FileDesc* buildEFs(FileList** pfileList, u2* fids, u1 len);
+void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType);
+void addChildEFs(FileDesc* parent, u2* fids, u2 len);
+FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len);
 
 FileDesc* creatEF_ACC();
 FileDesc* creatEF_ACL();
