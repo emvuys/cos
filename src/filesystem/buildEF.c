@@ -928,6 +928,6 @@ void printFileContent(u1* buff, u2 length) {
 	for(i = 0; i < length; i ++) {
 		printf("%02X", *(buff + i));
 	}
-	printf("\n");	
+	printf("\n");
 }
 

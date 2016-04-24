@@ -34,6 +34,13 @@ typedef int s4;
 #endif
 
 
+#define CHANNEL_ID_MASK	0xFC
+#define CHANNEL_OPENNED	1
+#define CHANNEL_CLOSED		0
+#define CHANNEL_0			0
+#define CHANNEL_1			1
+#define CHANNEL_2			2
+#define CHANNEL_3			3
 
 
 

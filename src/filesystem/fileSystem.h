@@ -1,5 +1,5 @@
-void processSelect(char* apdu);
-void processManageChannel(char* apdu);
+short processSelect(char* apdu, char* responseBuf, u2* responseLen);
+short processManageChannel(char* apdu);
 
 extern FileDesc* buildFileSystem();
 extern FileDesc* buildDFADF(u2 fid);
@@ -53,3 +53,30 @@ void charString2ByteString(u1* charString, u1* desBuf, u2 offset);
 u1 hexToDec(u1 c);
 
 void printFileContent(u1* buff, u2 length);
+
+void insertCard(u1* iccid, u1* imsi, u1* ki);
+
+void showFS();
+
+
+u1 getCLS(char* apdu);
+u1 getINS(char* apdu);
+u1 getP1(char* apdu);
+u1 getP2(char* apdu);
+u1 getP3(char* apdu) ;
+u1* getData(char* apdu);
+u2 getDataByte(char* apduData);
+u2 getDataShort(char* apduData);
+
+
+FileDesc* selectFId(u2 fid);
+FileDesc* selectChildDf();
+FileDesc* selectParentDf();
+FileDesc* selectbyAID(u1* aidBuf, u1 len, u1 terminal);
+FileDesc* selectByPathFromMf(u1* fidPath, u1 len);
+FileDesc* selectByPathFromCurrentDf(u1* fidPath, u1 len);
+
+extern ChannelInfo channels[4];
+extern u2 curChannelID;
+
+

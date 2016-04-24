@@ -57,9 +57,32 @@ typedef enum efType {
 }efType;
 
 enum fileAccess {
-    UNSHAREABLE,
-    SHAREABLE
+	UNSHAREABLE,
+	SHAREABLE
 }fileAccess;
+
+enum ErrorCode{
+	NONE = 0x9000,
+	UNKNOWN = 0x6F00,
+
+	WRONG_LENGTH = 0x6700,
+	INVALID_CLA = 0x6E00,
+	INVALID_INS = 0x6D00,
+	LOGICAL_CHANNEL_NOT_SUPPORTED = 0x6881,
+	SECURE_MESSAGE_NOT_SUPPORTED = 0x6882,
+
+	WRONG_PARAMS = 0x6A86,
+	WRONG_DATA = 0x6A80,
+	FILE_NOT_FOUND = 0x6A82,
+	RECORD_NOT_FOUND = 0x6A83,
+
+	SECURITY_NOT_SATISFIED = 0x6982,
+	PIN_BLOCKED = 0x6983,
+	NO_FILE_SELECTED = 0x6986,
+
+	AUTH_INCORRECT_MAC = 0x9862,
+	AUTH_CONTEXT_NOT_SUPPORTED = 0x9864
+}ErrorCode;
 
 struct ArrRef;
 struct FileList;
@@ -96,5 +119,11 @@ typedef struct FileDesc{
 }FileDesc;
 
 
+typedef struct ChannelInfo {
+	u1 isOpen;
+	FileDesc* curEF;
+	FileDesc* curDF;
+	FileDesc* curADF;
+}ChannelInfo;
 
 
