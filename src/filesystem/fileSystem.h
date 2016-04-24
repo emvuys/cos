@@ -49,3 +49,7 @@ FileDesc* creatEF_UST();
 void showFileSystem(FileDesc* mf);
 void showChildDFEF(FileList* fileList);
 
+void charString2ByteString(u1* charString, u1* desBuf, u2 offset);
+u1 hexToDec(u1 c);
+
+void printFileContent(u1* buff, u2 length);

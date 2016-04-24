@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
+#include <string.h>
 
 typedef unsigned char u1;
 typedef unsigned short u2;
@@ -12,25 +13,17 @@ typedef int s4;
 
 
 #define COS_MALLOC(size)			malloc(size)
+#define COS_FREE(s)				free(s)
 #define COS_MEMSET(buf, val, size)	memset(buf, val, size)
 #define COS_MEMCPY(buf, val, size)	memcpy(buf, val, size)
+#define COS_STRLEN(s)			strlen(s)
 
 
 #define DEBUG_LEVLE	1
 
-#if DEBUG_LEVLE==1
-#define DEBUG_LEVEL1
-#elif  DEBUG_LEVLE==2
-#define DEBUG_LEVEL2
-#endif
-
-#ifdef DEBUG_LEVEL2
-#define DEBUG_LEVEL1
-#endif
 
 
-
-#ifdef DEBUG_LEVEL2
+#if DEBUG_LEVLE==2
 #define PRINT_FUNC_NAME()	{printf("Func: ");printf(__FUNCTION__);printf("\n");}
 #define PRINT_STR(s)			{printf("%s\n", s);}
 #define PRINTGG()			{PRINT_STR("########");}
@@ -39,6 +32,8 @@ typedef int s4;
 #define PRINT_STR(s)			{}
 #define PRINTGG()			{}
 #endif
+
+
 
 
 

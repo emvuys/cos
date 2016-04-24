@@ -167,7 +167,7 @@ FileDesc* buildADF_USIM() {
 
 void addChildEFs(FileDesc* parent, u2* fids, u2 len) {
 	PRINT_FUNC_NAME();
-#ifdef DEBUG_LEVEL2
+#if DEBUG_LEVLE==3	
 	printf("fid num: %d\n", len);
 #endif	
 	buildEFs(parent,  fids, len);
@@ -188,7 +188,7 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 	if(*pfileList == NULL) {
 		PRINT_STR("pfileList is NULL");
 		pNew = COS_MALLOC(sizeof(FileList));
-#ifdef DEBUG_LEVEL2		
+#if DEBUG_LEVLE==3		
 		printf("COS_MALLOC addr[0x%4X]======\n", (int)pNew);
 #endif		
 		COS_MEMSET(pNew, 0, sizeof(FileList));
@@ -199,17 +199,17 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 	else {
 		PRINT_STR("pfileList is NOT NULL");
 		p = *pfileList;
-#ifdef DEBUG_LEVEL2		
+#if DEBUG_LEVLE==3		
 		printf("pfileList addr[0x%4X], fid[0x%02X]======\n", (int)p, p->me->fid);
 #endif
 		while(p->next!= NULL) {
-#ifdef DEBUG_LEVEL2
+#if DEBUG_LEVLE==3	
 			printf("pfileList addr next[0x%4X], fid[0x%02X]======\n", (int)(p->next), p->me->fid);
 #endif
 			p = p->next;
 		}
 		pNew = COS_MALLOC(sizeof(FileList));
-#ifdef DEBUG_LEVEL2		
+#if DEBUG_LEVLE==3	
 		printf("COS_MALLOC addr[0x%4X]======\n", (int)pNew);
 #endif
 		COS_MEMSET(pNew, 0, sizeof(FileList));

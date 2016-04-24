@@ -51,10 +51,15 @@ typedef enum fileType {
 }fileType;
 
 typedef enum efType {
-	transparent,
-	linearfix,
-	circle
+	TRANSPARENT,
+	LINEAR,
+	CIRCLE
 }efType;
+
+enum fileAccess {
+    UNSHAREABLE,
+    SHAREABLE
+}fileAccess;
 
 struct ArrRef;
 struct FileList;
@@ -74,6 +79,7 @@ typedef struct FileList{
 typedef struct FileDesc{
 	u2 fid;
 	u1 sfi;
+	u1 shareble;
 	fileType filetype;
 	efType eftype;
 	struct ArrRef arrRef;
