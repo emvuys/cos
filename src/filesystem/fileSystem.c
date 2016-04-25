@@ -49,6 +49,8 @@ u2 EFs_ADF_USIM[] = {
 };
 
 
+AIDFileDes aidFile[AID_COUNT];
+
 	
 FileDesc* buildFileSystem() {
 	FileDesc *mf, *teleDF, *adf, *phoneBook, *accessDF, *phoneBook_adf, *phoneBook_teleDF;
@@ -75,6 +77,9 @@ FileDesc* buildFileSystem() {
 	addChildEFs(adf, EFs_ADF_USIM, sizeof(EFs_ADF_USIM) / 2);
 	addChildEFs(teleDF, EFs_TELECOM, sizeof(EFs_TELECOM) / 2);
 	addChildEFs(accessDF, EFs_ACCESS, sizeof(EFs_ACCESS) / 2);
+
+	PRINT_FUNC_DONE();
+		
 	return mf;
 }
 
@@ -113,6 +118,9 @@ FileDesc* buildDF_MF() {
 	mf->arrRef.arrFid = 0x2F06;
 	mf->arrRef.arrFid = 1;
 	mf->filetype = MF;
+	mf->childDf = INVALID_FILE_LIST;
+	mf->childEf = INVALID_FILE_LIST;
+	mf->parent = INVALID_FILE;
 
 	return mf;
 }
@@ -126,6 +134,9 @@ FileDesc* buildDF_TELECOM() {
 	df->arrRef.arrFid = 0x2F06;
 	df->arrRef.arrFid = 1;
 	df->filetype = DF;
+	df->childDf = INVALID_FILE_LIST;
+	df->childEf = INVALID_FILE_LIST;
+	
 	return df;
 }
 
@@ -138,6 +149,9 @@ FileDesc* buildDF_GSM_ACCESS() {
 	df->arrRef.arrFid = 0x2F06;
 	df->arrRef.arrFid = 1;
 	df->filetype = DF;
+	df->childDf = INVALID_FILE_LIST;
+	df->childEf = INVALID_FILE_LIST;
+	
 	return df;
 }
 
@@ -150,6 +164,9 @@ FileDesc* buildDF_PHONEBOOK() {
 	df->arrRef.arrFid = 0x2F06;
 	df->arrRef.arrFid = 1;
 	df->filetype = DF;
+	df->childDf = INVALID_FILE_LIST;
+	df->childEf = INVALID_FILE_LIST;
+	
 	return df;
 }
 
@@ -162,6 +179,11 @@ FileDesc* buildADF_USIM() {
 	df->arrRef.arrFid = 0x2F06;
 	df->arrRef.arrFid = 1;
 	df->filetype = ADF;
+	df->childDf = INVALID_FILE_LIST;
+	df->childEf = INVALID_FILE_LIST;
+	
+	addAdfAid(ADF_USIM_AID, df, 0);
+	
 	return df;
 }
 
@@ -177,6 +199,10 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 	FileList* p, *pNew, **pfileList;
 	PRINT_FUNC_NAME();
 
+#if DEBUG_LEVLE==3		
+		printf("addChildFile: [0x%2X]======\n", file->fid);
+#endif		
+
 	file->parent = parent;
 	
 	if(fileType == EF) {
@@ -185,24 +211,24 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 		pfileList = &(parent->childDf);
 	}
 	
-	if(*pfileList == NULL) {
-		PRINT_STR("pfileList is NULL");
+	if(*pfileList == INVALID_FILE_LIST) {
+		PRINT_STR("pfileList is INVALID_FILE_LIST");
 		pNew = COS_MALLOC(sizeof(FileList));
 #if DEBUG_LEVLE==3		
 		printf("COS_MALLOC addr[0x%4X]======\n", (int)pNew);
 #endif		
 		COS_MEMSET(pNew, 0, sizeof(FileList));
 		pNew->me = file;
-		pNew->next = NULL;
+		pNew->next = INVALID_FILE_LIST;
 		*pfileList = pNew;
 	}
 	else {
-		PRINT_STR("pfileList is NOT NULL");
+		PRINT_STR("pfileList is NOT INVALID_FILE_LIST");
 		p = *pfileList;
-#if DEBUG_LEVLE==3		
+#if DEBUG_LEVLE==3
 		printf("pfileList addr[0x%4X], fid[0x%02X]======\n", (int)p, p->me->fid);
 #endif
-		while(p->next!= NULL) {
+		while(p->next!= INVALID_FILE_LIST) {
 #if DEBUG_LEVLE==3	
 			printf("pfileList addr next[0x%4X], fid[0x%02X]======\n", (int)(p->next), p->me->fid);
 #endif
@@ -214,7 +240,7 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 #endif
 		COS_MEMSET(pNew, 0, sizeof(FileList));
 		pNew->me = file;
-		pNew->next = NULL;
+		pNew->next = INVALID_FILE_LIST;
 		p->next = pNew;
 	}
 }
@@ -223,27 +249,25 @@ void showFileSystem(FileDesc* mf) {
 
 	PRINT_FUNC_NAME();
 
-	if(mf == NULL) {
-		PRINT_STR("MF is NULL");
+	if(mf == INVALID_FILE) {
+		PRINT_STR("MF is INVALID_FILE");
 	}
 	
 	PRINTGG();
-	if(mf->childDf != NULL) {
-		
+	if(mf->childDf != INVALID_FILE_LIST) {
 		showChildDFEF(mf->childDf);
 	}
 	else {
-		PRINT_STR("childDf is NULL");
+		PRINT_STR("childDf is INVALID_FILE");
 	}
 
 	PRINTGG();
 
-	if(mf->childEf != NULL) {
-		
+	if(mf->childEf != INVALID_FILE_LIST) {
 		showChildDFEF(mf->childEf);
 	}
 	else {
-		PRINT_STR("childEf is NULL");
+		PRINT_STR("childEf is INVALID_FILE");
 	}
 
 	PRINTGG();
@@ -254,26 +278,94 @@ void showChildDFEF(FileList* fileList) {
 	FileDesc* pFile;
 	FileList* pListNode = fileList;
 
-	//PRINT_FUNC_NAME();
+	PRINT_FUNC_NAME();
 	
-	while(pListNode != NULL) {
+	while(pListNode != INVALID_FILE_LIST) {
 		pFile = pListNode->me;
 		printf("fid: 0x%2X, type: %d, ", pFile->fid, pFile->filetype);
-		if(pFile->parent != NULL) {
+		if(pFile->parent != INVALID_FILE) {
 			printf("parentfid: 0x%2X, type: %d\n", pFile->parent->fid, pFile->parent->filetype);
 		}
 		else {
-			printf("parent is NULL\n");
+			printf("parent is INVALID_FILE\n");
 		}
 		if((pListNode->me->filetype == DF) || (pListNode->me->filetype == ADF)) {
-			if(pListNode->me->childDf != NULL) {
+			if(pListNode->me->childDf != INVALID_FILE_LIST) {
 				showChildDFEF(pListNode->me->childDf);
 			}
-			if(pListNode->me->childEf != NULL) {
+			if(pListNode->me->childEf != INVALID_FILE_LIST) {
 				showChildDFEF(pListNode->me->childEf);
 			}
 		}
 		pListNode = pListNode->next;
 	}
+}
+
+FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
+	FileDesc* file = INVALID_FILE;
+	u1 index = 0, i = 0, len = aidLen;
+
+	PRINT_FUNC_NAME();
+
+//#if DEBUG_LEVLE == 3
+	printf("len[%02X], aid: ", len);
+	while(len --) {
+		printf("%02X",  *(aid + (i ++)));
+	}
+	printf("\n");
+	i = 0;
+//#endif
+
+	do{
+		len = aidFile[index].aidLen;
+		printf("len[%02X], index[%d], aidMember: ", len, index);
+		if(len != 0) {
+			while(aidLen --) {
+				printf("%02X",  *(aidFile[index].aid + (i ++)));
+			}
+			i = 0;
+		}
+		printf("\n");
+		
+		if((aidFile[index].aidLen != 0) &&
+			(aidFile[index].aidLen == aidLen) && 
+			(COS_MEMCMP(aidFile[index].aid, aid, aidLen) == 0) &&
+			(aidFile[index].file != INVALID_FILE)) {
+			file = aidFile[index].file;
+			break;
+		}
+	}while(index ++ < (AID_COUNT - 1));
+	
+	return file;
+}
+
+void addAdfAid(u1 * aid, FileDesc* file, u1 index) {
+	u1* buf, len;
+	buf = aidString2Buffer(aid, &len);
+	aidFile[index].aid = buf;
+	aidFile[index].aidLen = len;
+	aidFile[index].file = file;
+
+	PRINT_FUNC_NAME();
+	printf("aid[%s], len[%02X], index[%d], fid[%02X]\n", aid, len, index, file->fid);
+}
+
+u1* aidString2Buffer(u1* aid, u1* aidlen) {
+	u1* buf, left, right, i;
+	u1 strlength  = COS_STRLEN(aid);
+	u1 buflen = strlength / 2;
+
+	PRINT_FUNC_NAME();
+	printf("aid[%s], len[%02X]\n", aid, buflen);
+	
+	buf = COS_MALLOC(buflen);
+
+	for(i = 0; i < strlength; i += 2) {
+		left = hexToDec(*(aid + i));
+		right = hexToDec(*(aid + i + 1));
+		buf[i /2] = (left << 4) + right;
+	}
+	*aidlen = buflen;
+	return buf;
 }
 

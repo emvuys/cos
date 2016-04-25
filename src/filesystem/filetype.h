@@ -61,7 +61,7 @@ enum fileAccess {
 	SHAREABLE
 }fileAccess;
 
-enum ErrorCode{
+enum ErrorCode {
 	NONE = 0x9000,
 	UNKNOWN = 0x6F00,
 
@@ -84,22 +84,28 @@ enum ErrorCode{
 	AUTH_CONTEXT_NOT_SUPPORTED = 0x9864
 }ErrorCode;
 
-struct ArrRef;
-struct FileList;
-struct FileDesc;
+//struct ArrRef;
+//struct FileList;
+//struct FileDesc;
 
-typedef struct ArrRef{
+typedef struct AIDFileDes {
+	u1* aid;
+	u1 aidLen;
+	struct FileDesc* file;
+}AIDFileDes;
+
+typedef struct ArrRef {
 	u2 arrFid;
 	u1 arrRecordNum;
 }ArrRef;
 
 
-typedef struct FileList{
+typedef struct FileList {
 	struct FileDesc *me;
 	struct FileList *next;
 }FileList;
 
-typedef struct FileDesc{
+typedef struct FileDesc {
 	u2 fid;
 	u1 sfi;
 	u1 shareble;

@@ -9,6 +9,21 @@
 ChannelInfo channels[4];
 u2 curChannelID = 0xFF;
 
+void initChannel() {
+	u1 i;
+	
+	for(i = 0; i < 4; i ++) {
+		closeChannelID(i);
+		channels[i].curEF = INVALID_FILE;
+		channels[i].curDF = INVALID_FILE;
+		channels[i].curADF = INVALID_FILE;
+	}
+	
+	openChannelID(CHANNEL_0);
+	setCurChannelID(CHANNEL_0);
+	setCurDF(MFRef);
+}
+
 int getAvailableChannel(){
     return 1;
 }
@@ -34,7 +49,9 @@ void openChannelID(u1 channelId) {
 void closeChannelID(u1 channelId) {
 	channels[channelId].isOpen = CHANNEL_CLOSED;
 }
-
+FileDesc* getMF() {
+	return MFRef;
+}
 FileDesc* getCurEF() {
 	return channels[getCurChannelID()].curEF;
 }

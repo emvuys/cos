@@ -69,14 +69,49 @@ u2 getDataByte(char* apduData);
 u2 getDataShort(char* apduData);
 
 
+FileDesc* selectChild(FileDesc* df, u2 fid);
+FileDesc* selectChildDf(FileDesc* df, u2 fid);
+FileDesc* selectChildEf(FileDesc* df, u2 fid);
 FileDesc* selectFId(u2 fid);
-FileDesc* selectChildDf();
-FileDesc* selectParentDf();
+FileDesc* selectParentDf(u2 fid);
 FileDesc* selectbyAID(u1* aidBuf, u1 len, u1 terminal);
 FileDesc* selectByPathFromMf(u1* fidPath, u1 len);
 FileDesc* selectByPathFromCurrentDf(u1* fidPath, u1 len);
 
 extern ChannelInfo channels[4];
 extern u2 curChannelID;
+extern FileDesc* MFRef;
+extern u2 curChannelID;
+
+void initChannel();
 
 
+int getAvailableChannel();
+u1 getCurChannelID() ;
+void setCurChannelID(u1 cls);
+ChannelInfo getChannelInfoFromChannelID(u1 channelID);
+u1 isChannelIdOpen(u1 channelId);
+void openChannelID(u1 channelId);
+void closeChannelID(u1 channelId);
+
+FileDesc* getMF();
+FileDesc* getCurEF();
+void setCurEF(FileDesc* pfile);
+FileDesc* getCurDF();
+void setCurDF(FileDesc* pfile);
+FileDesc* getCurADF();
+void setCurADF(FileDesc* pfile);
+
+FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len);
+
+
+void addAdfAid(u1 * aid, FileDesc* file, u1 index);
+u1* aidString2Buffer(u1* aid, u1* aidlen);
+
+
+FileDesc* getAdfFileDes(u1* aid, u1 aidLen);
+
+void printAPDU(u1* apdu);
+
+#define AID_COUNT	2
+extern AIDFileDes aidFile[AID_COUNT];

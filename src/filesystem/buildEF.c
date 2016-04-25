@@ -8,10 +8,10 @@
 FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 	u2 fid;
 	u1 index = 0;
-	FileDesc* ef = NULL;
+	FileDesc* ef = INVALID_FILE;
 
 	if(len == 0) {
-		return NULL;
+		return INVALID_FILE;
 	}
 	
 	do{
@@ -119,7 +119,7 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 			default:
 				break;
 		}
-		if(ef != NULL) {
+		if(ef != INVALID_FILE) {
 			addChildFile(parent, ef, EF);
 		}
 	}while(index ++ < (len - 1));
