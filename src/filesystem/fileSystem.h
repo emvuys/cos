@@ -115,3 +115,9 @@ void printAPDU(u1* apdu);
 
 #define AID_COUNT	2
 extern AIDFileDes aidFile[AID_COUNT];
+
+extern FileDesc* AdfUsimRef;
+
+void printADF();
+
+

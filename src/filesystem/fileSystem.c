@@ -122,6 +122,8 @@ FileDesc* buildDF_MF() {
 	mf->childEf = INVALID_FILE_LIST;
 	mf->parent = INVALID_FILE;
 
+	MFRef = mf;
+
 	return mf;
 }
 
@@ -183,13 +185,15 @@ FileDesc* buildADF_USIM() {
 	df->childEf = INVALID_FILE_LIST;
 	
 	addAdfAid(ADF_USIM_AID, df, 0);
+
+	AdfUsimRef = df;
 	
 	return df;
 }
 
 void addChildEFs(FileDesc* parent, u2* fids, u2 len) {
 	PRINT_FUNC_NAME();
-#if DEBUG_LEVLE==3	
+#if DEBUG_LEVLE > 2	
 	printf("fid num: %d\n", len);
 #endif	
 	buildEFs(parent,  fids, len);
@@ -199,7 +203,7 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 	FileList* p, *pNew, **pfileList;
 	PRINT_FUNC_NAME();
 
-#if DEBUG_LEVLE==3		
+#if DEBUG_LEVLE > 2		
 		printf("addChildFile: [0x%2X]======\n", file->fid);
 #endif		
 
@@ -214,7 +218,7 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 	if(*pfileList == INVALID_FILE_LIST) {
 		PRINT_STR("pfileList is INVALID_FILE_LIST");
 		pNew = COS_MALLOC(sizeof(FileList));
-#if DEBUG_LEVLE==3		
+#if DEBUG_LEVLE > 2			
 		printf("COS_MALLOC addr[0x%4X]======\n", (int)pNew);
 #endif		
 		COS_MEMSET(pNew, 0, sizeof(FileList));
@@ -225,17 +229,17 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 	else {
 		PRINT_STR("pfileList is NOT INVALID_FILE_LIST");
 		p = *pfileList;
-#if DEBUG_LEVLE==3
+#if DEBUG_LEVLE > 2	
 		printf("pfileList addr[0x%4X], fid[0x%02X]======\n", (int)p, p->me->fid);
 #endif
 		while(p->next!= INVALID_FILE_LIST) {
-#if DEBUG_LEVLE==3	
+#if DEBUG_LEVLE > 2		
 			printf("pfileList addr next[0x%4X], fid[0x%02X]======\n", (int)(p->next), p->me->fid);
 #endif
 			p = p->next;
 		}
 		pNew = COS_MALLOC(sizeof(FileList));
-#if DEBUG_LEVLE==3	
+#if DEBUG_LEVLE > 2		
 		printf("COS_MALLOC addr[0x%4X]======\n", (int)pNew);
 #endif
 		COS_MEMSET(pNew, 0, sizeof(FileList));
@@ -307,26 +311,32 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 
 	PRINT_FUNC_NAME();
 
-//#if DEBUG_LEVLE == 3
+#if DEBUG_LEVLE > 2	
 	printf("len[%02X], aid: ", len);
 	while(len --) {
 		printf("%02X",  *(aid + (i ++)));
 	}
 	printf("\n");
 	i = 0;
-//#endif
+#endif
 
 	do{
+#if DEBUG_LEVLE > 2		
 		len = aidFile[index].aidLen;
-		printf("len[%02X], index[%d], aidMember: ", len, index);
+		if(aidFile[index].file != INVALID_FILE) {
+			printf("len[%02X], index[%d], fid[%02X], aidMember: ", len, index,  aidFile[index].file->fid);
+		}
+		else {
+			printf("len[%02X], index[%d], aidMember: ", len, index);
+		}
 		if(len != 0) {
-			while(aidLen --) {
+			while(len --) {
 				printf("%02X",  *(aidFile[index].aid + (i ++)));
 			}
 			i = 0;
 		}
 		printf("\n");
-		
+#endif
 		if((aidFile[index].aidLen != 0) &&
 			(aidFile[index].aidLen == aidLen) && 
 			(COS_MEMCMP(aidFile[index].aid, aid, aidLen) == 0) &&
@@ -335,6 +345,10 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 			break;
 		}
 	}while(index ++ < (AID_COUNT - 1));
+
+	if(file != INVALID_FILE) {
+		printf("ADF found: fid[%02X]\n", file->fid);
+	}
 	
 	return file;
 }

@@ -5,26 +5,23 @@
 #include "../inc/types.h"
 
 FileDesc* MFRef;
+FileDesc* AdfUsimRef;
 
 void insertCard(u1* iccid, u1* imsi, u1* ki) {
 	PRINT_FUNC_NAME();
-	
+
+	COS_MEMSET(aidFile, 0, sizeof(aidFile));
 	MFRef = buildFileSystem();
 	initChannel();
 
-	COS_MEMSET(aidFile, 0, sizeof(aidFile));
+	
 }
 
 void showFS() {
 	showFileSystem(MFRef);
 }
 
-#define OFFSET_CLS	0
-#define OFFSET_INS	1
-#define OFFSET_P1	2
-#define OFFSET_P2	3
-#define OFFSET_P3	4
-#define OFFSET_DATA	5
+
 
 u1 getCLS(char* apdu) {
 	return *(apdu + OFFSET_CLS);
@@ -86,12 +83,15 @@ void printAPDU(u1* apdu) {
 }
 
 
+
 short processSelect(char* apdu, char* responseBuf, u2* responseLen){
 	u1 needsFcp = 0, flag = 0;
 	FileDesc* file;
 	u2 sw = FILE_NOT_FOUND;
 
 	PRINT_FUNC_NAME();
+
+	//printADF();
 
 	if(getCurEF() != INVALID_FILE) {
 		printf("CurEF: %02X\n", getCurEF()->fid);
@@ -154,18 +154,30 @@ short processSelect(char* apdu, char* responseBuf, u2* responseLen){
 	if( file != INVALID_FILE) {
 		sw = NONE;
 
+		if((file->filetype == DF) || (file->filetype == MF) || (file->filetype == ADF)) {
+			setCurDF(file);
+			if(file->filetype == ADF) {
+				setCurADF(file);
+			}
+			setCurEF(INVALID_FILE);
+		}
+		else if(file->filetype == EF) {
+			setCurEF(file);
+		}
+	
+
 		if(needsFcp != 0) {
 			needsFcp = 0;
-			printf("start copy\n");
 			responseBuf[needsFcp ++] = needsFcp;
 			responseBuf[needsFcp ++] = needsFcp;
 			responseBuf[needsFcp ++] = needsFcp;
 			responseBuf[needsFcp ++] = needsFcp;
 			responseBuf[needsFcp ++] = needsFcp;
 			responseBuf[needsFcp ++] = needsFcp;
-			printf("start copy\n");
 			*responseLen = needsFcp;
-			printf("start copy\n");
+		}
+		else {
+			*responseLen = 0;
 		}
 		
 	}
@@ -186,7 +198,7 @@ FileDesc* selectFId(u2 fid) {
 
 	PRINT_FUNC_NAME();
 
-#if DEBUG_LEVLE == 3
+#if DEBUG_LEVLE > 2	
 	printf("selecting fid [%02X]\n", fid);
 #endif
 
@@ -249,7 +261,7 @@ FileDesc* selectChildEf(FileDesc* df, u2 fid) {
 	PRINT_FUNC_NAME();
 	
 	while(curEF != INVALID_FILE_LIST) {
-#if DEBUG_LEVLE == 3
+#if DEBUG_LEVLE > 2	
 		printf("ChildEF[%02X]\n", curEF->me->fid);
 #endif
 		if(curEF->me->fid == fid) {
@@ -279,7 +291,7 @@ FileDesc* selectbyAID(u1* aidBuf, u1 len, u1 terminal) {
 	
 	file = getAdfFileDes(aidBuf, len);
 	if(file != INVALID_FILE) {
-		setCurADF(file);
+		return file;
 	}
 	return INVALID_FILE;
 }
@@ -303,15 +315,15 @@ FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len) {
 	u1* pfid = fidPath;
 
 	PRINT_FUNC_NAME();
-//#if DEBUG_LEVLE == 3
+#if DEBUG_LEVLE > 2	
 	printf("selectByPath DF[%02X]\n", df->fid);
-//#endif
+#endif
 
 	while(step --){
 		fid = getShort(pfid);
-//#if DEBUG_LEVLE == 3
+#if DEBUG_LEVLE > 2	
 		printf("selectByPath fid[%02X]\n", fid);
-//#endif
+#endif
 		if(fid == 0x7FFF) {
 			file = getCurADF();
 			pfid ++;
@@ -326,3 +338,25 @@ FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len) {
 }
 
 
+void printADF(){
+	u1 len, index = 0, i = 0;
+	
+	len = aidFile[index].aidLen;
+	printf("len[%02X], index[%d], aidMember: ", len, index);
+	if(len != 0) {
+		while(len --) {
+			printf("%02X",  *(aidFile[index].aid + (i ++)));
+		}
+		i = 0;
+	}
+	
+	index ++;
+	len = aidFile[index].aidLen;
+	printf("len[%02X], index[%d], aidMember: ", len, index);
+	if(len != 0) {
+		while(len --) {
+			printf("%02X",  *(aidFile[index].aid + (i ++)));
+		}
+		i = 0;
+	}
+}

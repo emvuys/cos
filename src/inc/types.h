@@ -20,11 +20,11 @@ typedef int s4;
 #define COS_STRLEN(s)				strlen(s)
 
 
-#define DEBUG_LEVLE	2
+#define DEBUG_LEVLE	1
 
 
 
-#if DEBUG_LEVLE>=2
+#if DEBUG_LEVLE==2
 #define PRINT_FUNC_NAME()	{printf("Func: ");printf(__FUNCTION__);printf("\n");}
 #define PRINT_FUNC_DONE()	{printf("Func: ");printf(__FUNCTION__);printf(" DONE\n");}
 #define PRINT_STR(s)			{printf("%s\n", s);}

@@ -16,7 +16,7 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 	
 	do{
 		fid = fids[index];
-#if DEBUG_LEVLE==3	
+#if DEBUG_LEVLE > 2	
 		printf("fid[0x%2x], idx: %d\n", fid, index);
 #endif
 		switch (fid) {
