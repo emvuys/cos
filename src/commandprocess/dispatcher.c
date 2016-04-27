@@ -47,7 +47,7 @@ u2 getDataByte(char* apduData){
 	return *(apduData);
 }
 u2 getDataShort(char* apduData){
-	return (*(apduData + OFFSET_DATA) << 8) + *(apduData + OFFSET_DATA + 1);
+	return ((*(apduData + OFFSET_DATA) << 8) & 0xFF00) | (*(apduData + OFFSET_DATA + 1) & 0xFF);
 }
 
 short dispatcher(char* apdu, char* responseBuf, u2* responseLen) {
@@ -251,6 +251,9 @@ FileDesc* selectChildDf(FileDesc* df, u2 fid) {
 	PRINT_FUNC_NAME()
 	
 	while(curDF != INVALID_FILE_LIST) {
+#if DEBUG_LEVLE > 2	
+		printf("ChildDF[%02X]\n", curDF->me->fid);
+#endif		
 		if(curDF->me->fid == fid) {
 			file = curDF->me;
 			break;
@@ -322,21 +325,26 @@ FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len) {
 
 	PRINT_FUNC_NAME();
 #if DEBUG_LEVLE > 2	
-	printf("selectByPath DF[%02X]\n", df->fid);
+	printf("selectByPath DF[%02X], len[%02d], step[%02d]\n", df->fid, len, step);
 #endif
 
 	while(step --){
+		//printf("step[%02d]\n", step);
 		fid = getShort(pfid);
 #if DEBUG_LEVLE > 2	
 		printf("selectByPath fid[%02X]\n", fid);
 #endif
 		if(fid == 0x7FFF) {
 			file = getCurADF();
-			pfid ++;
+			pfid += 2;
+			//step --;
 			continue;
 		}
 		
 		file = selectChild(file, fid);
+		if(file == INVALID_FILE) {
+			return INVALID_FILE;
+		}
 		pfid += 2;
 	}
 	

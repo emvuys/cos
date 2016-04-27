@@ -108,7 +108,7 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 				ef = creatEF_SPN();
 				break;
 			case EF_START_HFN:
-				ef = creatEF_SPN();
+				ef = creatEF_START_HFN();
 				break;
 			case EF_THRESHOLD:
 				ef = creatEF_THRESHOLD();
