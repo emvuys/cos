@@ -50,6 +50,18 @@
 #define OFFSET_DATA	5
 
 
+#define FILE_CONTROL_PARAMETERS_TAG		0x62
+#define FILE_SIZE_TAG						0x80
+#define FILE_DESCRIPTOR_TAG					0x82
+#define FILE_IDENTIFIER_TAG					0x83
+#define DF_NAME_TAG							0x84
+#define SHORT_FILE_IDENTIFIER_TAG			0x88
+#define LIFE_CYCLE_STATUS_INTEGER_TAG		0x8A
+#define SECURITY_ATTRIBUTES_TAG			0x8B
+#define PROPRIETARY_INFORMATION_TAG		0xA5
+#define PIN_STATUS_TEMPLATE_DO_TAG		0xC6
+#define UICC_CHARACTERISTICS_TAG			0x80
+
 typedef enum fileType {
 	MF,
 	ADF,
@@ -60,7 +72,8 @@ typedef enum fileType {
 typedef enum efType {
 	TRANSPARENT,
 	LINEAR,
-	CIRCLE
+	CIRCLE,
+	BERSTUCT
 }efType;
 
 enum fileAccess {
@@ -94,6 +107,12 @@ enum ErrorCode {
 //struct ArrRef;
 //struct FileList;
 //struct FileDesc;
+
+typedef struct TLV {
+	u1 tag;
+	u2 offset;
+	u2 length;
+}TLV;
 
 typedef struct AIDFileDes {
 	u1* aid;

@@ -305,6 +305,17 @@ void showChildDFEF(FileList* fileList) {
 	}
 }
 
+u1* getAdfAID(FileDesc* file, u1* aidLen) {
+	u1 i = 0;
+	while(i ++ < sizeof(aidFile)) {
+		if(file == aidFile[i].file) {
+			*aidLen = aidFile[i].aidLen;
+			return aidFile[i].aid;
+		}
+	}
+	return NULL;
+}
+
 FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 	FileDesc* file = INVALID_FILE;
 	u1 index = 0, i = 0, len = aidLen;

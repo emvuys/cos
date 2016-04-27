@@ -7,6 +7,8 @@
 FileDesc* MFRef;
 FileDesc* AdfUsimRef;
 
+TLV* tlv;
+
 void insertCard(u1* iccid, u1* imsi, u1* ki) {
 	PRINT_FUNC_NAME();
 
@@ -14,7 +16,7 @@ void insertCard(u1* iccid, u1* imsi, u1* ki) {
 	MFRef = buildFileSystem();
 	initChannel();
 
-	
+	tlv = COS_MALLOC(sizeof(TLV));
 }
 
 void showFS() {
@@ -167,6 +169,7 @@ short processSelect(char* apdu, char* responseBuf, u2* responseLen){
 	
 
 		if(needsFcp != 0) {
+			/*
 			needsFcp = 0;
 			responseBuf[needsFcp ++] = needsFcp;
 			responseBuf[needsFcp ++] = needsFcp;
@@ -175,6 +178,9 @@ short processSelect(char* apdu, char* responseBuf, u2* responseLen){
 			responseBuf[needsFcp ++] = needsFcp;
 			responseBuf[needsFcp ++] = needsFcp;
 			*responseLen = needsFcp;
+			*/
+			getFCP(file, responseBuf);
+			*responseLen = getCurTLVLen() + 2;
 		}
 		else {
 			*responseLen = 0;
@@ -360,3 +366,173 @@ void printADF(){
 		i = 0;
 	}
 }
+
+void getFCP(FileDesc* file, u1* resBuf) {
+	u1 isEF = isFileEF(file);
+	setCurTLVTag(FILE_CONTROL_PARAMETERS_TAG);
+
+	setCurTLVLen(0);
+	setCurTLVOff(2);
+	getFileDescriptor(file, resBuf);
+	getFileIdentifier(file, resBuf);
+	if(file->filetype == ADF) {
+		getDFname(file, resBuf);
+	}
+	getProprietaryInformation(file, resBuf);
+	getLifeCycleStatusInteger(file, resBuf);
+	getSecurityattributes(file, resBuf);
+	if(isEF) {
+		getFilesize(file, resBuf);
+		getTotalfilesize(file, resBuf);
+		getShortFileIdentifier(file, resBuf);
+	} else {
+		getPINStatusTemplateDO(file, resBuf);
+		getTotalfilesize(file, resBuf);
+	}
+
+	resBuf[0] = getCurTLVTag();
+	resBuf[1] = getCurTLVLen();
+}
+
+void getFileDescriptor(FileDesc* file, u1* resBuf) {
+	u1 fileDescByte = 0;
+	u1 bytes[5] = {0, 0x21};
+	u1 isEF = isFileEF(file);
+
+	if(file->shareble == SHAREABLE) {
+		fileDescByte |= 1 << 6;
+	}
+	if(isEF) {
+		fileDescByte |= 1 << 3;
+		switch (file->eftype) {
+			case LINEAR:
+				fileDescByte |= 1 << 1;
+				break;
+			case TRANSPARENT:
+				fileDescByte |= 1 << 0;
+				break;
+			case CIRCLE:
+				fileDescByte |= 3 << 1;
+				break;
+			case BERSTUCT:
+				fileDescByte = 0x39;
+				break;
+		}
+	} else {
+		fileDescByte |= 7 << 3;
+	}
+
+	bytes[0] = fileDescByte;
+	if(isEF && ((file->eftype == CIRCLE) || (file->eftype == LINEAR))) {
+		bytes[2] = file->recordLen >> 8;
+		bytes[3] = file->recordLen & 0xFF;
+		bytes[4] = file->recordCnt;
+		appendTLBufferV(resBuf, FILE_DESCRIPTOR_TAG, bytes, 0, 5);
+	} else if(isEF){
+		appendTLBufferV(resBuf, FILE_DESCRIPTOR_TAG, bytes, 0, 2);
+	}
+}
+
+void getFileIdentifier(FileDesc* file, u1* resBuf) {
+	appendTLShortV(resBuf, FILE_IDENTIFIER_TAG, file->fid);
+}
+
+void getDFname(FileDesc* file, u1* resBuf) {
+	u1 len;
+	u1* buf = getAdfAID(file, &len);
+	appendTLBufferV(resBuf, DF_NAME_TAG, buf, 0, len);
+}
+
+void getProprietaryInformation(FileDesc* file, u1* resBuf) {
+	u1 buf[3] = {0x80, 0x01, 0x71};
+	appendTLBufferV(resBuf, PROPRIETARY_INFORMATION_TAG, buf, 0, 3);
+}
+
+void getLifeCycleStatusInteger(FileDesc* file, u1* resBuf) {
+	appendTLByteV(resBuf, LIFE_CYCLE_STATUS_INTEGER_TAG, 5);
+}
+
+void getSecurityattributes(FileDesc* file, u1* resBuf) {
+	u1 buf[3];
+	buf[0] = file->arrRef.arrFid >> 8;
+	buf[1] = file->arrRef.arrFid & 0xFF;
+	buf[2] = file->arrRef.arrRecordNum;
+	appendTLBufferV(resBuf, SECURITY_ATTRIBUTES_TAG, buf, 0, 3);
+}
+
+void getFilesize(FileDesc* file, u1* resBuf) {
+	appendTLShortV(resBuf, FILE_SIZE_TAG, file->fileLen);
+}
+
+void getTotalfilesize(FileDesc* file, u1* resBuf) {
+	
+}
+
+void getShortFileIdentifier(FileDesc* file, u1* resBuf) {
+	appendTLByteV(resBuf, SHORT_FILE_IDENTIFIER_TAG, file->sfi);
+}
+
+void getPINStatusTemplateDO(FileDesc* file, u1* resBuf) {
+	u1 buf[6] = {0x90, 0x01, 0x00, 0x83, 0x01, 0x01};
+	appendTLBufferV(resBuf, PIN_STATUS_TEMPLATE_DO_TAG, buf, 0, 6);
+}
+
+	
+u1 isFileEF(FileDesc* file) {
+	return file->filetype == EF;
+}
+
+u2 getCurTLVTag() {
+	return tlv->tag;
+}
+u2 getCurTLVOff() {
+	return tlv->offset;
+}
+u2 getCurTLVLen() {
+	return tlv->length;
+}
+u2 setCurTLVTag(u1 tag) {
+	tlv->tag = tag;
+}
+u2 setCurTLVOff(u2 off) {
+	tlv->offset = off;
+}
+u2 setCurTLVLen(u2 len) {
+	tlv->length = len;
+}
+
+void appendTLByteV(u1* buffer, u1 tag, u1 val){
+	u2 currLen = getCurTLVLen(), currOff = getCurTLVOff(tag);
+	currLen += 3;
+	buffer[currOff ++] = tag;
+	buffer[currOff ++] = 1;
+	buffer[currOff ++] = val;
+	setCurTLVLen(currLen);
+	setCurTLVOff(currOff);
+}
+
+void appendTLShortV(u1* buffer, u1 tag, u2 val){
+	u2 currLen = getCurTLVLen(), currOff = getCurTLVOff(tag);
+	currLen += 4;
+	buffer[currOff ++] = tag;
+	buffer[currOff ++] = 2;
+	buffer[currOff ++] = val >> 8;
+	buffer[currOff ++] = val & 0xFF;
+	setCurTLVLen(currLen);
+	setCurTLVOff(currOff);
+}
+
+void appendTLBufferV(u1* buffer, u1 tag, u1* valBuf, u1 valOff, u1 valLen){
+	u2 currLen = getCurTLVLen(), currOff = getCurTLVOff(tag);
+	currLen += (valLen + 2);
+	buffer[currOff ++] = tag;
+	buffer[currOff ++] = valLen;
+	COS_MEMCPY(buffer + currOff, valBuf + valOff, valLen);
+	currOff += valLen;
+	setCurTLVLen(currLen);
+	setCurTLVOff(currOff);
+}
+
+
+
+

@@ -118,6 +118,33 @@ extern AIDFileDes aidFile[AID_COUNT];
 
 extern FileDesc* AdfUsimRef;
 
+extern TLV* tlv;
+
 void printADF();
+
+u1 isFileEF(FileDesc* file);
+u2 getCurTLVTag();
+u2 getCurTLVOff();
+u2 getCurTLVLen();
+u2 setCurTLVTag(u1 tag);
+u2 setCurTLVOff(u2 off);
+u2 setCurTLVLen(u2 len);
+void appendTLByteV(u1* buffer, u1 tag, u1 val);
+void appendTLShortV(u1* buffer, u1 tag, u2 val);
+void appendTLBufferV(u1* buffer, u1 tag, u1* valBuf, u1 valOff, u1 valLen);
+
+
+u1* getAdfAID(FileDesc* file, u1* aidLen);
+void getFCP(FileDesc* file, u1* resBuf);
+void getFileDescriptor(FileDesc* file, u1* resBuf);
+void getFileIdentifier(FileDesc* file, u1* resBuf);
+void getDFname(FileDesc* file, u1* resBuf);
+void getProprietaryInformation(FileDesc* file, u1* resBuf);
+void getLifeCycleStatusInteger(FileDesc* file, u1* resBuf);
+void getSecurityattributes(FileDesc* file, u1* resBuf);
+void getFilesize(FileDesc* file, u1* resBuf);
+void getTotalfilesize(FileDesc* file, u1* resBuf);
+void getShortFileIdentifier(FileDesc* file, u1* resBuf);
+void getPINStatusTemplateDO(FileDesc* file, u1* resBuf);
 
 
