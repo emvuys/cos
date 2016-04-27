@@ -179,6 +179,7 @@ FileDesc* creatEF_AD() {
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_AD;
+	ef->sfi = 0x03;
 	ef->shareble = SHAREABLE;
 	ef->arrRef.arrFid = 0x6F06;
 	ef->arrRef.arrRecordNum= 1;
@@ -265,7 +266,7 @@ FileDesc* creatEF_DIR() {
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_DIR;
-	ef->sfi = 1;
+	ef->sfi = 0x1E;
 	ef->shareble = SHAREABLE;
 	ef->arrRef.arrFid = 0x6F06;
 	ef->arrRef.arrRecordNum= 1;
@@ -342,7 +343,7 @@ FileDesc* creatEF_EST() {
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_EST;
-	ef->sfi = 0x1D;
+	ef->sfi = 0x05;
 	ef->shareble = SHAREABLE;
 	ef->arrRef.arrFid = 0x6F06;
 	ef->arrRef.arrRecordNum= 4;
@@ -503,7 +504,7 @@ FileDesc* creatEF_KcGPRS() {
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_KcGPRS;
-	ef->sfi = 0x1;
+	ef->sfi = 0x2;
 	ef->shareble = SHAREABLE;
 	ef->arrRef.arrFid = 0x6F06;
 	ef->arrRef.arrRecordNum= 4;

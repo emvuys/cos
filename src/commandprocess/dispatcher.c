@@ -25,44 +25,60 @@ void showFS() {
 
 
 
-u1 getCLS(char* apdu) {
+u1 getCLS(u1* apdu) {
 	return *(apdu + OFFSET_CLS);
 }
-u1 getINS(char* apdu) {
+u1 getINS(u1* apdu) {
 	return *(apdu + OFFSET_INS);
 }
-u1 getP1(char* apdu) {
+u1 getP1(u1* apdu) {
 	return *(apdu + OFFSET_P1);
 }
-u1 getP2(char* apdu) {
+u1 getP2(u1* apdu) {
 	return *(apdu + OFFSET_P2);
 }
-u1 getP3(char* apdu) {
+u1 getP3(u1* apdu) {
 	return *(apdu + OFFSET_P3);
 }
-u1* getData(char* apdu) {
+u1* getData(u1* apdu) {
 	return apdu + OFFSET_DATA;
 }
-u2 getDataByte(char* apduData){
+u2 getDataByte(u1* apduData){
 	return *(apduData);
 }
-u2 getDataShort(char* apduData){
+u2 getDataShort(u1* apduData){
 	return ((*(apduData + OFFSET_DATA) << 8) & 0xFF00) | (*(apduData + OFFSET_DATA + 1) & 0xFF);
 }
 
-short dispatcher(char* apdu, char* responseBuf, u2* responseLen) {
-	unsigned char ins = getINS(apdu);
+short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
+	u1 ins = getINS(apdu);
 
 	PRINT_FUNC_NAME();
 	printAPDU(apdu);
 	switch(ins) {
-		case 0xA4:
+		case INS_SELECT:
 			return processSelect(apdu, responseBuf, responseLen);
-		case 0x70:
-			return processManageChannel(apdu);
-			break;
+		case INS_STATUS:
+			return processStatus(apdu, responseBuf, responseLen);
+		case INS_VERIFY_PIN:
+			return processVerifyPIN(apdu, responseBuf, responseLen);
+		case INS_UNBLOCK_PIN:
+			return processUnBlockPIN(apdu, responseBuf, responseLen);
+		case INS_MANAGE_CHANNEL:
+			return processManageChannel(apdu, responseBuf, responseLen);
+		case INS_READ_BINARY:
+			return processReadBin(apdu, responseBuf, responseLen);
+		case INS_UPDATE_BINARY:
+			return processUpdateBin(apdu, responseBuf, responseLen);
+		case INS_READ_RECORD:
+			return processReadRecord(apdu, responseBuf, responseLen);
+		case INS_UPDATE_RECORD:
+			return processUpdateRecord(apdu, responseBuf, responseLen);
+		case INS_AUTHENTICATE:
+			return processAuth(apdu, responseBuf, responseLen);
 		default:
 			PRINT_STR("Unkown command");
+			return INVALID_INS;
 			break;
 	}
 }
@@ -84,9 +100,7 @@ void printAPDU(u1* apdu) {
 	printf(" >\n");
 }
 
-
-
-short processSelect(char* apdu, char* responseBuf, u2* responseLen){
+short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
 	u1 needsFcp = 0, flag = 0;
 	FileDesc* file;
 	u2 sw = FILE_NOT_FOUND;
@@ -190,13 +204,277 @@ short processSelect(char* apdu, char* responseBuf, u2* responseLen){
 	
 	return sw;
 }
-
-short processManageChannel(char* apdu){
-	PRINT_FUNC_NAME();
+short processStatus(u1* apdu, u1* responseBuf, u2* responseLen){
+	FileDesc* file;
+	u2 sw = NONE;
+	
+	if (getP1(apdu) != 0x00 && getP1(apdu) != 0x01 && getP1(apdu) != 0x02) {
+		return WRONG_PARAMS;
+        }
+        switch (getP2(apdu)) {
+		case 0x00:
+			file = getCurDF();
+			getFCP(file, responseBuf);
+			*responseLen = getCurTLVLen() + 2;
+			return sw;
+		case 0x01:
+			file = getCurADF();
+			if (file == INVALID_FILE) {
+				return FILE_NOT_FOUND;
+			}
+			getADFName(file, responseBuf);
+			*responseLen = getCurTLVLen() + 2;
+			return sw;
+		case 0x0C:
+			return sw;
+		default:
+			return WRONG_PARAMS;
+		}
 }
+
+short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen){
+	if(getP1(apdu) != 0 || getP2(apdu) != 0x01) {
+		return WRONG_PARAMS;
+	}
+	*responseLen = 0;
+	switch (getP3(apdu)) {
+		case 0x00:
+			return VERYFY_PIN_RETRY_LEFT_TIME;
+		case 0x08:
+			return PIN_BLOCKED;
+		default:
+			return WRONG_PARAMS;
+	}
+	return NONE;
+}
+
+short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen){
+	if(getP1(apdu) != 0 || getP2(apdu) != 0x01) {
+		return WRONG_PARAMS;
+	}
+	*responseLen = 0;
+	switch (getP3(apdu)) {
+		case 0x00:
+			return VERYFY_PIN_RETRY_LEFT_TIME;
+		case 0x08:
+			return UNBLOCK_PIN_RETRY_LEFT_TIME;
+		default:
+			return WRONG_PARAMS;
+	}
+	return NONE;
+}
+
+short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen){
+	
+}
+short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen){
+	FileDesc* file;
+	u2 offset, len, sw = NONE;
+	u2 size = getP3(apdu) & 0xFF;
+	if((getP1(apdu) & 0x80) == 0) {
+		offset = getP1(apdu) << 8 | getP2(apdu);
+		file = getCurEF();
+	} else {
+		offset = getP2(apdu);
+		file = selectBySfi(getP1(apdu) & 0x1F);
+	}
+	if(file == INVALID_FILE) {
+		return NO_FILE_SELECTED;
+	}
+	*responseLen = readBinary(file, offset, size, responseBuf, responseLen);
+	return sw;
+}
+
+short readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* responseLen) {
+	if((offset < 0) || (offset > 0x7FFF) ||  (offset > file->fileLen) ||(size < 0) || (size > 0x7FFF)) {
+		return WRONG_LENGTH;
+	}
+        if(size == 0) {
+		size = file->fileLen - offset;
+		if(size >= 0x100) {
+			size = 0x100;
+		}
+	}
+	COS_MEMCPY(responseBuf, file->data + offset, size);
+	return size;
+}
+
+short processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen){
+	FileDesc* file;
+	u2 offset, len, sw = NONE;
+	u2 size = getP3(apdu) & 0xFF;
+	if((getP1(apdu) & 0x80) == 0) {
+		offset = getP1(apdu) << 8 | getP2(apdu);
+		file = getCurEF();
+	} else {
+		offset = getP2(apdu);
+		file = selectBySfi(getP1(apdu) & 0x1F);
+	}
+	if(file == INVALID_FILE) {
+		return NO_FILE_SELECTED;
+	}
+	updateBinary(file, offset, getData(apdu), getP3(apdu));
+	*responseLen = 0;
+	return sw;
+}
+
+short updateBinary(FileDesc* file, u2 offset, u1* data, u1 len) {
+	u2 sw = NONE;
+	if((offset < 0) || (offset > 0x7FFF) || (offset + len > file->fileLen)) {
+		return WRONG_LENGTH;
+	}
+	COS_MEMCPY(file->data + offset, data, len);
+	return sw;
+}
+
+short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen){
+	u1 number = getP1(apdu) & 0xFF;
+	u1 sfi = (getP2(apdu) >> 3) & 0x1F;
+	FileDesc* file;
+
+	if(sfi == 0) {
+		file = getCurEF();
+	} else {
+		file = selectBySfi(sfi);
+	}
+
+	if(file == INVALID_FILE) {
+		return NO_FILE_SELECTED;
+	}
+
+        switch (getP2(apdu) & 0x07) {
+		case 2:
+			readNextRecord(file, responseBuf);
+			break;
+		case 3:
+			readPreviousRecord(file, responseBuf);
+			break;
+		case 4:
+			readRecordAbs(file, number, responseBuf);
+			break;
+		default:
+			return WRONG_PARAMS;
+        }
+	*responseLen = file->recordLen;
+	return NONE;
+}
+
+void readNextRecord(FileDesc* file, u1* responseBuf) {
+	if(file->recordPointer > file->recordCnt) {
+		return;
+	}
+	file->recordPointer ++;
+	if(file->recordPointer ==  file->recordCnt) {
+		 file->recordPointer = 1;
+	}
+	readRecordAbs(file, 0, responseBuf);
+}
+
+void readPreviousRecord(FileDesc* file, u1* responseBuf) {
+	if(file->recordPointer < 0) {
+		return;
+	}
+	file->recordPointer --;
+	if(file->recordPointer ==  0) {
+		 file->recordPointer = file->recordCnt;
+	}
+	readRecordAbs(file, 0, responseBuf);
+}
+
+void readRecordAbs(FileDesc* file, u1 recordNum, u1* responseBuf) {
+	if(file->eftype != LINEAR) {
+		return;
+	}
+	if((recordNum < 0) || (recordNum > file->recordCnt)) {
+		return;
+	}
+
+        if (recordNum == 0) {
+		recordNum = file->recordPointer;
+        }
+	recordNum --;
+	COS_MEMCPY(responseBuf, file->data + file->recordLen * recordNum, file->recordLen);
+}
+
+
+
+short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen){
+	u1 number = getP1(apdu) & 0xFF;
+	u1 sfi = (getP2(apdu) >> 3) & 0x1F;
+	FileDesc* file;
+	if (sfi == 0) {
+		file = getCurEF();
+	} else {
+		file = selectBySfi(sfi);
+	}
+
+        if (file == INVALID_FILE) {
+		return NO_FILE_SELECTED;
+        }
+        switch (getP2(apdu) & 0x07) {
+		case 2:
+			updateNextRecord(file, getData(apdu));
+			break;
+		case 3:
+			updatePreviousRecord(file, getData(apdu));
+			break;
+		case 4:
+			updateRecordAbs(file, number, getData(apdu));
+			break;
+		default:
+			return WRONG_PARAMS;
+        }
+        *responseLen = 0;
+        return NONE;
+}
+
+void updateNextRecord(FileDesc* file, u1* apduData) {
+	if(file->recordPointer > file->recordCnt) {
+		return;
+	}
+	file->recordPointer ++;
+	if(file->recordPointer ==  file->recordCnt) {
+		 file->recordPointer = 1;
+	}
+	updateRecordAbs(file, 0, apduData);
+}
+
+void updatePreviousRecord(FileDesc* file, u1* apduData) {
+	if(file->recordPointer < 0) {
+		return;
+	}
+	file->recordPointer --;
+	if(file->recordPointer ==  0) {
+		 file->recordPointer = file->recordCnt;
+	}
+	updateRecordAbs(file, 0, apduData);
+}
+
+void updateRecordAbs(FileDesc* file, u1 recordNum, u1* apduData) {
+	if(file->eftype != LINEAR) {
+		return;
+	}
+	if((recordNum < 0) || (recordNum > file->recordCnt)) {
+		return;
+	}
+
+        if (recordNum == 0) {
+		recordNum = file->recordPointer;
+        }
+	recordNum --;
+	COS_MEMCPY(file->data + file->recordLen * recordNum, apduData, file->recordLen);
+}
+
+short processAuth(u1* apdu, u1* responseBuf, u2* responseLen){
+}
+
 
 FileDesc* selectMF() {
 	return MFRef;
+}
+
+FileDesc* selectBySfi(u1 sfi) {
+	return selectChildSfi(getCurDF(), sfi);
 }
 
 FileDesc* selectFId(u2 fid) {
@@ -244,6 +522,17 @@ FileDesc* selectChild(FileDesc* df, u2 fid) {
 	return file;
 }
 
+FileDesc* selectChildSfi(FileDesc* df, u1 sfi) {
+	FileDesc* file;
+	PRINT_FUNC_NAME();
+	
+	file = selectChildDfSfi(df, sfi);
+	if(file == INVALID_FILE) {
+		file = selectChildEfSfi(df, sfi);
+	}
+	return file;
+}
+
 FileDesc* selectChildDf(FileDesc* df, u2 fid) {
 	FileDesc* file = INVALID_FILE;
 	FileList* curDF = df->childDf;
@@ -263,6 +552,25 @@ FileDesc* selectChildDf(FileDesc* df, u2 fid) {
 	return file;
 }
 
+FileDesc* selectChildDfSfi(FileDesc* df, u1 sfi) {
+	FileDesc* file = INVALID_FILE;
+	FileList* curDF = df->childDf;
+
+	PRINT_FUNC_NAME()
+	
+	while(curDF != INVALID_FILE_LIST) {
+#if DEBUG_LEVLE > 2	
+		printf("ChildDF[%02X], sfi[%02X]\n", curDF->me->fid, curDF->me->sfi);
+#endif		
+		if(curDF->me->sfi == sfi) {
+			file = curDF->me;
+			break;
+		}
+		curDF = curDF->next;
+	}
+	return file;
+}
+
 FileDesc* selectChildEf(FileDesc* df, u2 fid) {
 	FileDesc* file = INVALID_FILE;
 	FileList* curEF = df->childEf;
@@ -274,6 +582,26 @@ FileDesc* selectChildEf(FileDesc* df, u2 fid) {
 		printf("ChildEF[%02X]\n", curEF->me->fid);
 #endif
 		if(curEF->me->fid == fid) {
+			file = curEF->me;
+			break;
+		}
+		curEF = curEF->next;
+	}
+	return file;
+}
+
+
+FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi) {
+	FileDesc* file = INVALID_FILE;
+	FileList* curEF = df->childEf;
+
+	PRINT_FUNC_NAME();
+	
+	while(curEF != INVALID_FILE_LIST) {
+#if DEBUG_LEVLE > 2	
+		printf("ChildEF[%02X], sfi[%02X]\n", curDF->me->fid, curDF->me->sfi);
+#endif
+		if(curEF->me->sfi == sfi) {
 			file = curEF->me;
 			break;
 		}
@@ -375,6 +703,14 @@ void printADF(){
 	}
 }
 
+void getADFName(FileDesc* file, u1* resBuf) {
+	setCurTLVTag(FILE_CONTROL_PARAMETERS_TAG);
+	setCurTLVLen(0);
+	setCurTLVOff(2);
+	getDFname(file, resBuf);
+	resBuf[0] = getCurTLVTag();
+	resBuf[1] = getCurTLVLen();
+}
 void getFCP(FileDesc* file, u1* resBuf) {
 	u1 isEF = isFileEF(file);
 	setCurTLVTag(FILE_CONTROL_PARAMETERS_TAG);

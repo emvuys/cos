@@ -1,5 +1,17 @@
-short processSelect(char* apdu, char* responseBuf, u2* responseLen);
-short processManageChannel(char* apdu);
+
+short processSelect(u1* apdu, u1* responseBuf, u2* responseLen);
+short processStatus(u1* apdu, u1* responseBuf, u2* responseLen);
+short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen);
+short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen);
+short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen);
+short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen);
+short processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen);
+short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen);
+short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen);
+short processAuth(u1* apdu, u1* responseBuf, u2* responseLen);
+
+short updateBinary(FileDesc* file, u2 offset, u1* data, u1 len);
+short readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* responseLen);
 
 extern FileDesc* buildFileSystem();
 extern FileDesc* buildDFADF(u2 fid);
@@ -59,24 +71,36 @@ void insertCard(u1* iccid, u1* imsi, u1* ki);
 void showFS();
 
 
-u1 getCLS(char* apdu);
-u1 getINS(char* apdu);
-u1 getP1(char* apdu);
-u1 getP2(char* apdu);
-u1 getP3(char* apdu) ;
-u1* getData(char* apdu);
-u2 getDataByte(char* apduData);
-u2 getDataShort(char* apduData);
+u1 getCLS(u1* apdu);
+u1 getINS(u1* apdu);
+u1 getP1(u1* apdu);
+u1 getP2(u1* apdu);
+u1 getP3(u1* apdu) ;
+u1* getData(u1* apdu);
+u2 getDataByte(u1* apduData);
+u2 getDataShort(u1* apduData);
 
 
 FileDesc* selectChild(FileDesc* df, u2 fid);
 FileDesc* selectChildDf(FileDesc* df, u2 fid);
 FileDesc* selectChildEf(FileDesc* df, u2 fid);
 FileDesc* selectFId(u2 fid);
+FileDesc* selectBySfi(u1 fid);
 FileDesc* selectParentDf(u2 fid);
 FileDesc* selectbyAID(u1* aidBuf, u1 len, u1 terminal);
 FileDesc* selectByPathFromMf(u1* fidPath, u1 len);
 FileDesc* selectByPathFromCurrentDf(u1* fidPath, u1 len);
+
+short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen);
+void readNextRecord(FileDesc* file, u1* responseBuf);
+void readPreviousRecord(FileDesc* file, u1* responseBuf);
+void readRecordAbs(FileDesc* file, u1 recordNum, u1* responseBuf);
+short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen);
+void updateNextRecord(FileDesc* file, u1* apduData);
+void updatePreviousRecord(FileDesc* file, u1* apduData);
+void updateRecordAbs(FileDesc* file, u1 recordNum, u1* apduData);
+
+void getADFName(FileDesc* file, u1* resBuf);
 
 extern ChannelInfo channels[4];
 extern u2 curChannelID;
@@ -147,4 +171,8 @@ void getTotalfilesize(FileDesc* file, u1* resBuf);
 void getShortFileIdentifier(FileDesc* file, u1* resBuf);
 void getPINStatusTemplateDO(FileDesc* file, u1* resBuf);
 
+
+FileDesc* selectChildSfi(FileDesc* df, u1 sfi);
+FileDesc* selectChildDfSfi(FileDesc* df, u1 sfi);
+FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi);
 
