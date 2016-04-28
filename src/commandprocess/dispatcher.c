@@ -272,8 +272,57 @@ short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen){
 
 short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen){
 	u2 sw = NONE;
-	*responseLen = 0;
-	return sw;
+	u1 newChannel = INVALID_CHANNLE_ID;
+
+	switch (getP1(apdu) & 0xFF) {
+		case 0x00:
+			if (getP2(apdu) != 0x00) {
+				return WRONG_PARAMS;
+			}
+			newChannel = openChannel(getCurChannelID());
+			if(newChannel == INVALID_CHANNLE_ID) {
+				return LOGICAL_CHANNEL_NOT_SUPPORTED;
+			} else {
+				*responseBuf = newChannel;
+				*responseLen = 1;
+				return sw;
+			}
+		case 0x80:
+			if (getP2(apdu) == 0) {
+				return WRONG_PARAMS;
+			}
+			newChannel = closeChannel(getP2(apdu));
+			if (newChannel != RETURN_OK) {
+				return LOGICAL_CHANNEL_NOT_SUPPORTED;
+			} else {
+				return NONE;
+			}
+		default:
+			return WRONG_PARAMS;
+        }
+}
+
+u1 openChannel(u1 srcChnId) {
+	u1 desChn = getAvaibleChannlNum();
+	if (desChn == INVALID_CHANNLE_ID) {
+		return RETURN_ERR;
+	}
+	if (srcChnId != CHANNEL_0) {
+		copyChannelInfo(srcChnId, desChn);
+	} else {
+		openChannelID(desChn);
+		setCurDFonChn(MFRef, desChn);
+	}
+	return desChn;
+}
+
+u1 closeChannel(u1 sChnId) {
+	if (isChannelIdOpen(sChnId)) {
+		closeChannelID(sChnId);
+		return RETURN_OK;
+	} else {
+		return RETURN_ERR;
+	}
 }
 
 short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen){

@@ -47,7 +47,11 @@ typedef int s4;
 
 #define INVALID_FILE			(FileDesc*)(-1)
 #define INVALID_FILE_LIST	(FileList*)(-1)
+#define INVALID_CHANNLE_ID	(u1)(-1)
 
 #define ADF_USIM_AID		"A0000000871002FF86FFFF89FFFFFFFF"
 #define ADF_USIM_AID_LEN	0x10
+
+#define RETURN_OK		0
+#define RETURN_ERR		1
 

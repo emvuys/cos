@@ -13,6 +13,9 @@ short processAuth(u1* apdu, u1* responseBuf, u2* responseLen);
 short updateBinary(FileDesc* file, u2 offset, u1* data, u1 len);
 short readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* responseLen);
 
+u1 openChannel(u1 srcChnId);
+u1 closeChannel(u1 sChnId);
+
 extern FileDesc* buildFileSystem();
 extern FileDesc* buildDFADF(u2 fid);
 extern FileDesc* buildDF_MF();
@@ -123,6 +126,7 @@ FileDesc* getCurEF();
 void setCurEF(FileDesc* pfile);
 FileDesc* getCurDF();
 void setCurDF(FileDesc* pfile);
+void setCurDFonChn(FileDesc* pfile, u1 chn);
 FileDesc* getCurADF();
 void setCurADF(FileDesc* pfile);
 
@@ -145,6 +149,10 @@ extern FileDesc* AdfUsimRef;
 extern TLV* tlv;
 
 void printADF();
+
+u1 getAvaibleChannlNum();
+void copyChannelInfo(u1 srcChn, u1 DesChn);
+
 
 u1 isFileEF(FileDesc* file);
 u2 getCurTLVTag();
