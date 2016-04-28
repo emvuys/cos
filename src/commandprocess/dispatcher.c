@@ -12,7 +12,7 @@ TLV* tlv;
 void insertCard(u1* iccid, u1* imsi, u1* ki) {
 	PRINT_FUNC_NAME();
 
-	COS_MEMSET(aidFile, 0, sizeof(aidFile));
+	initADF();
 	MFRef = buildFileSystem();
 	initChannel();
 
@@ -55,6 +55,19 @@ short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
 
 	PRINT_FUNC_NAME();
 	printAPDU(apdu);
+
+	printf("Chn: %02X\n", getCurChannelID());
+	if(getCurEF() != INVALID_FILE) {
+		printf("CurEF: %02X\n", getCurEF()->fid);
+	}
+	if(getCurDF() != INVALID_FILE) {
+		printf("CurDF: %02X\n", getCurDF()->fid);
+	}
+	if(getCurADF() != INVALID_FILE) {
+		printf("CurAD: %02X\n", getCurADF()->fid);
+	}
+
+	setCurChannelID(getCLS(apdu));
 	switch(ins) {
 		case INS_SELECT:
 			return processSelect(apdu, responseBuf, responseLen);
@@ -78,8 +91,8 @@ short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
 			return processAuth(apdu, responseBuf, responseLen);
 		default:
 			PRINT_STR("Unkown command");
+			*responseLen = 0;
 			return INVALID_INS;
-			break;
 	}
 }
 
@@ -109,15 +122,7 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
 
 	//printADF();
 
-	if(getCurEF() != INVALID_FILE) {
-		printf("CurEF: %02X\n", getCurEF()->fid);
-	}
-	if(getCurDF() != INVALID_FILE) {
-		printf("CurDF: %02X\n", getCurDF()->fid);
-	}
-	if(getCurADF() != INVALID_FILE) {
-		printf("CurAD: %02X\n", getCurADF()->fid);
-	}
+	
 
 	switch ((getP2(apdu) >> 2) & 0x07) {
 		case 1: 
@@ -201,13 +206,14 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
 		}
 		
 	}
+
 	
 	return sw;
 }
 short processStatus(u1* apdu, u1* responseBuf, u2* responseLen){
 	FileDesc* file;
 	u2 sw = NONE;
-	
+
 	if (getP1(apdu) != 0x00 && getP1(apdu) != 0x01 && getP1(apdu) != 0x02) {
 		return WRONG_PARAMS;
         }
@@ -229,7 +235,7 @@ short processStatus(u1* apdu, u1* responseBuf, u2* responseLen){
 			return sw;
 		default:
 			return WRONG_PARAMS;
-		}
+	}
 }
 
 short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen){
@@ -265,8 +271,11 @@ short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen){
 }
 
 short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen){
-	
+	u2 sw = NONE;
+	*responseLen = 0;
+	return sw;
 }
+
 short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen){
 	FileDesc* file;
 	u2 offset, len, sw = NONE;
@@ -466,6 +475,9 @@ void updateRecordAbs(FileDesc* file, u1 recordNum, u1* apduData) {
 }
 
 short processAuth(u1* apdu, u1* responseBuf, u2* responseLen){
+	u2 sw = NONE;
+	*responseLen = 0;
+	return sw;
 }
 
 
@@ -599,7 +611,7 @@ FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi) {
 	
 	while(curEF != INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2	
-		printf("ChildEF[%02X], sfi[%02X]\n", curDF->me->fid, curDF->me->sfi);
+		printf("ChildEF[%02X], sfi[%02X]\n", curEF->me->fid, curEF->me->sfi);
 #endif
 		if(curEF->me->sfi == sfi) {
 			file = curEF->me;
@@ -713,6 +725,14 @@ void getADFName(FileDesc* file, u1* resBuf) {
 }
 void getFCP(FileDesc* file, u1* resBuf) {
 	u1 isEF = isFileEF(file);
+
+	if(file != INVALID_FILE) {
+		printf("getFCP fid[%04X]\n", file->fid);
+	} else {
+		printf("getFCP INVALID_FILE\n");
+		return;
+	}
+	
 	setCurTLVTag(FILE_CONTROL_PARAMETERS_TAG);
 
 	setCurTLVLen(0);

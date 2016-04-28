@@ -128,7 +128,7 @@ void setCurADF(FileDesc* pfile);
 
 FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len);
 
-
+void initADF();
 void addAdfAid(u1 * aid, FileDesc* file, u1 index);
 u1* aidString2Buffer(u1* aid, u1* aidlen);
 

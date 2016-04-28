@@ -24,7 +24,7 @@ typedef int s4;
 
 
 
-#if DEBUG_LEVLE==2
+#if DEBUG_LEVLE>=2
 #define PRINT_FUNC_NAME()	{printf("Func: ");printf(__FUNCTION__);printf("\n");}
 #define PRINT_FUNC_DONE()	{printf("Func: ");printf(__FUNCTION__);printf(" DONE\n");}
 #define PRINT_STR(s)			{printf("%s\n", s);}
@@ -37,7 +37,7 @@ typedef int s4;
 #endif
 
 
-#define CHANNEL_ID_MASK	0xFC
+#define CHANNEL_ID_MASK	(~0xFC)
 #define CHANNEL_OPENNED	1
 #define CHANNEL_CLOSED		0
 #define CHANNEL_0			0

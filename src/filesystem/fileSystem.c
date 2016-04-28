@@ -341,6 +341,7 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 			printf("len[%02X], index[%d], aidMember: ", len, index);
 		}
 		if(len != 0) {
+			i = 0;
 			while(len --) {
 				printf("%02X",  *(aidFile[index].aid + (i ++)));
 			}
@@ -360,10 +361,18 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 	if(file != INVALID_FILE) {
 		printf("ADF found: fid[%02X]\n", file->fid);
 	}
-	
+	PRINT_FUNC_DONE();
 	return file;
 }
 
+void initADF() {
+	u1 i = 0;
+	while(i ++ < AID_COUNT) {
+		aidFile[i].aid = NULL;
+		aidFile[i].aidLen = 0;
+		aidFile[i].file = INVALID_FILE;
+	}
+}
 void addAdfAid(u1 * aid, FileDesc* file, u1 index) {
 	u1* buf, len;
 	buf = aidString2Buffer(aid, &len);
