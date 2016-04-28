@@ -14,7 +14,7 @@ typedef enum INS{
 	INS_GET_DATA = 0xCA,
 	INS_STORE_DATA = 0xE2,
 	INS_AUTHENTICATE = 0x88
-}INS;
+} INS;
 
 enum ErrorCode {
 	NONE = 0x9000,
@@ -40,10 +40,20 @@ enum ErrorCode {
 
 	AUTH_INCORRECT_MAC = 0x9862,
 	AUTH_CONTEXT_NOT_SUPPORTED = 0x9864
-}ErrorCode;
+} ErrorCode;
 
-extern void insertCard(u1* iccid, u1* imsi, u1* ki);
-
+extern void insertCard(	u1* imsi,
+						u1* ki,
+						u1* opc,
+						u1* iccid,
+						u1* acc,
+						u1* spn,
+						u1* apn,
+						u1* hplmn,
+						u1* ehplmn,
+						u1* loci,
+						u1* psloci,
+						u1* fplmn );
 extern short processSelect(u1* apdu, u1* responseBuf, u2* responseLen);
 extern short processStatus(u1* apdu, u1* responseBuf, u2* responseLen);
 extern short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen);

@@ -1,22 +1,29 @@
 #include "../inc/types.h"
 
-void charString2ByteString(u1* charString, u1* desBuf, u2 offset) {
+void charString2ByteString(u1* charString, u1* desBuf, u2 offset, u1 flag) {
 	u2 strlength, buflen, i;
 	u1* buf;
-	u1 left, right;
+	u1 left, right, space = 2;
+
+	if (flag & STRING_SPACE) {
+		space = 3;
+	}
 	
 	strlength = COS_STRLEN(charString);
-	if (strlength < 3) {
-		strlength = 3;
+	if (strlength < space) {
+		strlength = space;
 	}
-	buflen = (strlength + 1) / 3;
+	buflen = (strlength + 1) / space;
 	buf = COS_MALLOC(buflen);
 
-
-	for(i = 0; i < strlength; i += 3) {
+	for (i = 0; i < strlength; i += space) {
 		left = hexToDec(*(charString + i));
 		right = hexToDec(*(charString + i + 1));
-		buf[i /3] = (left << 4) + right;
+		if (flag & flag & STRING_WAPE) {
+			buf[i /space] = (right << 4) + left;
+		} else {
+			buf[i /space] = (left << 4) + right;
+		}
 	}
 	COS_MEMCPY(desBuf + offset, buf, buflen);
 	COS_FREE(buf);
@@ -45,7 +52,7 @@ u1* aidString2Buffer(u1* aid, u1* aidlen) {
 	
 	buf = COS_MALLOC(buflen);
 
-	for(i = 0; i < strlength; i += 2) {
+	for (i = 0; i < strlength; i += 2) {
 		left = hexToDec(*(aid + i));
 		right = hexToDec(*(aid + i + 1));
 		buf[i /2] = (left << 4) + right;
@@ -54,24 +61,26 @@ u1* aidString2Buffer(u1* aid, u1* aidlen) {
 	return buf;
 }
 
-void printFileContent(u1* buff, u2 length) {
+void printFileContent(FileDesc* file) {
 	u2 i;
+	u1* buff = file->data;
+	u2 length = file->fileLen;
 
-	return;
-	printf("File: ");
-	for(i = 0; i < length; i ++) {
+	//return;
+	printf("Fid[%02X] ", file->fid);
+	for (i = 0; i < length; i ++) {
 		printf("%02X", *(buff + i));
 	}
 	printf("\n");
 }
 
-void printADF(){
+void printADF() {
 	u1 len, index = 0, i = 0;
 	
 	len = aidFile[index].aidLen;
 	printf("len[%02X], index[%d], aidMember: ", len, index);
 	if (len != 0) {
-		while(len --) {
+		while (len --) {
 			printf("%02X",  *(aidFile[index].aid + (i ++)));
 		}
 		i = 0;
@@ -81,7 +90,7 @@ void printADF(){
 	len = aidFile[index].aidLen;
 	printf("len[%02X], index[%d], aidMember: ", len, index);
 	if (len != 0) {
-		while(len --) {
+		while (len --) {
 			printf("%02X",  *(aidFile[index].aid + (i ++)));
 		}
 		i = 0;
@@ -99,7 +108,7 @@ void printAPDU(u1* apdu) {
 		getP3(apdu)
 		);
 
-	while(p3 --) {
+	while (p3 --) {
 		printf("%02X",  *(apdu + OFFSET_DATA + (i ++)));
 	}
 	printf(" >\n");
@@ -142,7 +151,7 @@ void showChildDFEF(FileList* fileList) {
 
 	PRINT_FUNC_NAME();
 	
-	while(pListNode != INVALID_FILE_LIST) {
+	while (pListNode != INVALID_FILE_LIST) {
 		pFile = pListNode->me;
 		printf("fid: 0x%2X, type: %d, ", pFile->fid, pFile->filetype);
 		if (pFile->parent != INVALID_FILE) {

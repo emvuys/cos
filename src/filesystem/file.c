@@ -78,7 +78,7 @@ void getFileDescriptor(FileDesc* file, u1* resBuf) {
 		bytes[3] = file->recordLen & 0xFF;
 		bytes[4] = file->recordCnt;
 		appendTLBufferV(resBuf, FILE_DESCRIPTOR_TAG, bytes, 0, 5);
-	} else if (isEF){
+	} else if (isEF) {
 		appendTLBufferV(resBuf, FILE_DESCRIPTOR_TAG, bytes, 0, 2);
 	}
 }
@@ -171,7 +171,7 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 #if DEBUG_LEVLE > 2	
 		printf("pfileList addr[0x%4X], fid[0x%02X]======\n", (int)p, p->me->fid);
 #endif
-		while(p->next!= INVALID_FILE_LIST) {
+		while (p->next!= INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2		
 			printf("pfileList addr next[0x%4X], fid[0x%02X]======\n", (int)(p->next), p->me->fid);
 #endif
@@ -188,9 +188,18 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 	}
 }
 
+void initADF() {
+	u1 i = 0;
+	while (i ++ < AID_COUNT) {
+		aidFile[i].aid = NULL;
+		aidFile[i].aidLen = 0;
+		aidFile[i].file = INVALID_FILE;
+	}
+}
+
 u1* getAdfAID(FileDesc* file, u1* aidLen) {
 	u1 i = 0;
-	while(i ++ < sizeof(aidFile)) {
+	while (i ++ < sizeof(aidFile)) {
 		if (file == aidFile[i].file) {
 			*aidLen = aidFile[i].aidLen;
 			return aidFile[i].aid;
@@ -207,7 +216,7 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 
 #if DEBUG_LEVLE > 2	
 	printf("len[%02X], aid: ", len);
-	while(len --) {
+	while (len --) {
 		printf("%02X",  *(aid + (i ++)));
 	}
 	printf("\n");
@@ -224,7 +233,7 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 		}
 		if (len != 0) {
 			i = 0;
-			while(len --) {
+			while (len --) {
 				printf("%02X",  *(aidFile[index].aid + (i ++)));
 			}
 			i = 0;
@@ -238,7 +247,7 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 			file = aidFile[index].file;
 			break;
 		}
-	}while(index ++ < (AID_COUNT - 1));
+	} while (index ++ < (AID_COUNT - 1));
 
 	if (file != INVALID_FILE) {
 		printf("ADF found: fid[%02X]\n", file->fid);
@@ -247,14 +256,6 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 	return file;
 }
 
-void initADF() {
-	u1 i = 0;
-	while(i ++ < AID_COUNT) {
-		aidFile[i].aid = NULL;
-		aidFile[i].aidLen = 0;
-		aidFile[i].file = INVALID_FILE;
-	}
-}
 void addAdfAid(u1 * aid, FileDesc* file, u1 index) {
 	u1* buf, len;
 	buf = aidString2Buffer(aid, &len);
@@ -264,4 +265,113 @@ void addAdfAid(u1 * aid, FileDesc* file, u1 index) {
 
 	PRINT_FUNC_NAME();
 	printf("aid[%s], len[%02X], index[%d], fid[%02X]\n", aid, len, index, file->fid);
+}
+
+void configureProfile(	u1* imsi,
+						u1* ki,
+						u1* opc,
+						u1* iccid,
+						u1* acc,
+						u1* spn,
+						u1* hplmn,
+						u1* ehplmn,
+						u1* loci,
+						u1* psloci,
+						u1* fplmn ) {
+	configIMSI(imsi);
+	configKI(ki);
+	configOPC(opc);
+	configICCID(iccid);
+	configACC(acc);
+	configSPN(spn);
+	configHPLMN(hplmn);
+	configEHPLMN(ehplmn);
+	configLOCI(loci);
+	configPSLOCI(psloci);
+	configFPLMN(fplmn);
+}
+
+void configIMSI(u1* imsi) {
+	u1 buf[18], len = COS_STRLEN(imsi);
+	COS_MEMSET(buf, 'F', sizeof(buf));
+	buf[0] = (len + 1) / 2 + '0';
+	buf[1] = '0';
+	buf[2] = (len % 2 == 0) ? '1' : '9';
+	COS_MEMCPY(buf + 3, imsi, len);
+	charString2ByteString(buf, profile->imsi->data, 0, STRING_NOSPACE_WAPE);
+	printFileContent(profile->imsi);
+	return;
+}
+
+void configKI(u1* ki) {
+}
+
+void configOPC(u1* opc) {
+}
+
+void configICCID(u1* iccid) {
+	u1 buf[20], len = COS_STRLEN(iccid);
+	if (len == 0) {
+		return;
+	}
+	COS_MEMSET(buf, 'F', sizeof(buf));
+	COS_MEMCPY(buf, iccid, len);
+	charString2ByteString(buf, profile->iccid->data, 0, STRING_NOSPACE_WAPE);
+	printFileContent(profile->iccid);
+}
+
+void configACC(u1* acc) {
+	charString2ByteString(acc, profile->acc->data, 0, STRING_NOSPACE_NOWAPE);
+	printFileContent(profile->acc);
+}
+
+u1 isASCII(u1* buf) {
+	u1 i, length = COS_STRLEN(buf), ch;
+	for (i = 0; i < length; i ++) {
+		ch = *(buf + i);
+		if (ch > 0x7F) {
+			return RETURN_ERR;
+		}
+	}
+	return RETURN_OK;
+}
+void configSPN(u1* spn) {
+	u1 buf[17], len = COS_STRLEN(spn);
+	COS_MEMSET(buf, 0xFF, sizeof(buf));
+
+	buf[0] = 00;
+	if (isASCII(spn) == RETURN_OK) {
+		if (len > 16) {
+			len = 16;
+		}
+		COS_MEMCPY(buf + 1, spn, len);
+	} else {
+		if (len > 14) {
+			len = 14;
+		}
+		buf[1] = 0x80;
+		COS_MEMCPY(buf + 2, spn, len);
+	}
+	COS_MEMCPY(profile->spn->data, buf, 17);
+	printFileContent(profile->spn);
+}
+
+void configHPLMN(u1* hplmn) {
+	
+}
+
+void configEHPLMN(u1* ehplmn) {
+	
+}
+
+void configLOCI(u1* loci) {
+	charString2ByteString(loci, profile->loci->data, 0, STRING_NOSPACE_NOWAPE);
+}
+
+void configPSLOCI(u1* psloci) {
+	charString2ByteString(psloci, profile->psloci->data, 0, STRING_NOSPACE_NOWAPE);
+}
+
+void configFPLMN(u1* fplmn) {
+	
 }

@@ -6,6 +6,7 @@
 extern AIDFileDes aidFile[AID_COUNT];
 extern FileDesc* MFRef;
 extern FileDesc* AdfUsimRef;
+extern Profile* profile;
 
 extern FileDesc* buildFileSystem();
 extern FileDesc* buildDFADF(u2 fid);

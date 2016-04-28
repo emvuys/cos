@@ -50,11 +50,14 @@ u2 EFs_ADF_USIM[] = {
 AIDFileDes aidFile[AID_COUNT];
 FileDesc* MFRef;
 FileDesc* AdfUsimRef;
+Profile* profile;
 
 FileDesc* buildFileSystem() {
 	FileDesc *mf, *teleDF, *adf, *phoneBook, *accessDF, *phoneBook_adf, *phoneBook_teleDF;
 
 	PRINT_FUNC_NAME();
+
+	profile = COS_MALLOC(sizeof(Profile));
 
 	mf = buildDFADF(DF_MF);
 	

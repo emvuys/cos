@@ -16,6 +16,7 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 		switch (fid) {
 			case EF_ACC:
 				ef = creatEF_ACC();
+				profile->acc = ef;
 				break;
 			case EF_ACL:
 				ef = creatEF_ACL();
@@ -37,24 +38,29 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 				break;
 			case EF_EHPLMN:
 				ef = creatEF_EHPLMN();
+				profile->ehplmn= ef;
 				break;
 			case EF_EST:
 				ef = creatEF_EST();
 				break;
 			case EF_FPLMN:
 				ef = creatEF_FPLMN();
+				profile->fplmn= ef;
 				break;
 			case EF_HPLMNwAcT:
 				ef = creatEF_HPLMNwAcT();
 				break;
 			case EF_HPPLMN:
 				ef = creatEF_HPPLMN();
+				profile->hplmn= ef;
 				break;
 			case EF_ICCID:
 				ef = creatEF_ICCID();
+				profile->iccid= ef;
 				break;
 			case EF_IMSI:
 				ef = creatEF_IMSI();
+				profile->imsi= ef;
 				break;
 			case EF_Kc:
 				ef = creatEF_Kc();
@@ -73,6 +79,7 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 				break;
 			case EF_LOCI:
 				ef = creatEF_LOCI();
+				profile->loci= ef;
 				break;
 			case EF_NETPAR:
 				ef = creatEF_NETPAR();
@@ -94,12 +101,14 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 				break;
 			case EF_PSLOCI:
 				ef = creatEF_PSLOCI();
+				profile->psloci= ef;
 				break;
 			case EF_SPDI:
 				ef = creatEF_SPDI();
 				break;
 			case EF_SPN:
 				ef = creatEF_SPN();
+				profile->spn= ef;
 				break;
 			case EF_START_HFN:
 				ef = creatEF_START_HFN();
@@ -116,7 +125,7 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 		if (ef != INVALID_FILE) {
 			addChildFile(parent, ef, EF);
 		}
-	}while(index ++ < (len - 1));
+	} while (index ++ < (len - 1));
 }
 
 FileDesc* creatEF_ACC() {
@@ -133,12 +142,12 @@ FileDesc* creatEF_ACC() {
 	ef->arrRef.arrRecordNum= 3;
 	ef->filetype = EF;
 	ef->eftype = TRANSPARENT;
-	ef->fileLen = 0x10;
+	ef->fileLen = 2;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("00 01", ef->data, 0);
+	charString2ByteString("00 01", ef->data, 0, STRING_SPACE_NOWAPE);
 	
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 		
 	return ef;
 }
@@ -159,9 +168,9 @@ FileDesc* creatEF_ACL() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("01 DD 00", ef->data, 0);
+	charString2ByteString("01 DD 00", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	
 	return ef;
 }
@@ -183,9 +192,9 @@ FileDesc* creatEF_AD() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("00 00 00 02", ef->data, 0);
+	charString2ByteString("00 00 00 02", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	
 
 	return ef;
@@ -211,11 +220,11 @@ FileDesc* creatEF_ARR() {
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
 	charString2ByteString("80 01 01 90 00 80 01 1A A4 06 83 01 0A 95 01 08", 
-		ef->data, (ef->recordLen * (index ++)));
+		ef->data, (ef->recordLen * (index ++)), STRING_SPACE_NOWAPE);
 	charString2ByteString("80 01 01 90 00 80 01 02 A4 06 83 01 01 95 01 08 80 01 18 A4 06 83 01 0A 95 01 08", 
-		ef->data, (ef->recordLen * (index ++)));
+		ef->data, (ef->recordLen * (index ++)), STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	
 	return ef;
 }
@@ -241,15 +250,15 @@ FileDesc* creatEF_ARR_SUB() {
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
 	
 	charString2ByteString("80 01 01 90 00 80 01 1A A4 06 83 01 0A 95 01 08", 
-		ef->data, (ef->recordLen * (index ++)));
+		ef->data, (ef->recordLen * (index ++)), STRING_SPACE_NOWAPE);
 	charString2ByteString("80 01 01 90 00 80 01 02 A4 06 83 01 01 95 01 08 80 01 18 A4 06 83 01 0A 95 01 08", 
-		ef->data, (ef->recordLen * (index ++)));
+		ef->data, (ef->recordLen * (index ++)), STRING_SPACE_NOWAPE);
 	charString2ByteString("80 01 01 A4 06 83 01 01 95 01 08 80 01 1A A4 06 83 01 0A 95 01 08", 
-		ef->data, (ef->recordLen * (index ++)));
+		ef->data, (ef->recordLen * (index ++)), STRING_SPACE_NOWAPE);
 	charString2ByteString("80 01 03 A4 06 83 01 01 95 01 08 80 01 18 A4 06 83 01 0A 95 01 08", 
-		ef->data, (ef->recordLen * (index ++)));
+		ef->data, (ef->recordLen * (index ++)), STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -274,9 +283,9 @@ FileDesc* creatEF_DIR() {
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
 	charString2ByteString("61 1A 4F 10 A0 00 00 00 87 10 02 FF 86 FF FF 89 FF FF FF FF 50 06 52 45 44 54 45 41", 
-		ef->data, (ef->recordLen * (index ++)));
+		ef->data, (ef->recordLen * (index ++)), STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -300,9 +309,9 @@ FileDesc* creatEF_ECC() {
 	ef->fileLen = ef->recordCnt * ef->recordLen;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF 00", ef->data, 0);
+	charString2ByteString("FF FF FF 00", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	
 	return ef;
 }
@@ -324,9 +333,9 @@ FileDesc* creatEF_EHPLMN() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF", ef->data, 0);
+	charString2ByteString("FF FF FF", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	
 	return ef;
 }
@@ -348,9 +357,9 @@ FileDesc* creatEF_EST() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("00", ef->data, 0);
+	charString2ByteString("00", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -372,9 +381,9 @@ FileDesc* creatEF_FPLMN() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF FF FF FF FF FF FF FF FF FF", ef->data, 0);
+	charString2ByteString("FF FF FF FF FF FF FF FF FF FF FF FF", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -396,9 +405,9 @@ FileDesc* creatEF_HPLMNwAcT() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF 00 00", ef->data, 0);
+	charString2ByteString("FF FF FF 00 00", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -420,9 +429,9 @@ FileDesc* creatEF_HPPLMN() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("50", ef->data, 0);
+	charString2ByteString("50", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -444,9 +453,9 @@ FileDesc* creatEF_ICCID() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("98 58 02 00 00 00 00 00 00 04", ef->data, 0);
+	charString2ByteString("98 58 02 00 00 00 00 00 00 04", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -465,12 +474,12 @@ FileDesc* creatEF_IMSI() {
 	ef->arrRef.arrRecordNum= 1;
 	ef->filetype = EF;
 	ef->eftype = TRANSPARENT;
-	ef->fileLen = 0x10;
+	ef->fileLen = 9;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("08 FF FF FF FF FF FF FF FF", ef->data, 0);
+	charString2ByteString("08 FF FF FF FF FF FF FF FF", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -492,9 +501,9 @@ FileDesc* creatEF_Kc() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF FF FF FF FF FF 07", ef->data, 0);
+	charString2ByteString("FF FF FF FF FF FF FF FF 07", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -516,9 +525,9 @@ FileDesc* creatEF_KcGPRS() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF FF FF FF FF FF 07", ef->data, 0);
+	charString2ByteString("FF FF FF FF FF FF FF FF 07", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	return ef;
 }
 
@@ -539,9 +548,10 @@ FileDesc* creatEF_Keys() {
 	ef->fileLen = 0x30;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("07 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF", ef->data, 0);
+	charString2ByteString("07 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF",
+		ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -563,9 +573,10 @@ FileDesc* creatEF_KeysPS() {
 	ef->fileLen = 0x30;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("07 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF", ef->data, 0);
+	charString2ByteString("07 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF", 
+		ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -587,9 +598,9 @@ FileDesc* creatEF_LI() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF", ef->data, 0);
+	charString2ByteString("FF FF", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -611,9 +622,9 @@ FileDesc* creatEF_LOCI() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF FF FF FF FF FF FE 00 01", ef->data, 0);
+	charString2ByteString("FF FF FF FF FF FF FF FF FE 00 01", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -635,9 +646,10 @@ FileDesc* creatEF_NETPAR() {
 	ef->fileLen = 0x40;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF", ef->data, 0);
+	charString2ByteString("FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF",
+		ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -661,9 +673,9 @@ FileDesc* creatEF_OPL() {
 	ef->fileLen = ef->recordCnt * ef->recordLen;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("DD DD DD 00 00 FF FE 01", ef->data, 0);
+	charString2ByteString("DD DD DD 00 00 FF FE 01", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -685,9 +697,10 @@ FileDesc* creatEF_OPLMNwAcT() {
 	ef->fileLen = 0x40;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00", ef->data, 0);
+	charString2ByteString("FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00", 
+		ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	return ef;
 }
 
@@ -708,9 +721,9 @@ FileDesc* creatEF_PL() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF", ef->data, 0);
+	charString2ByteString("FF FF", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -732,9 +745,10 @@ FileDesc* creatEF_PLMNwAcT() {
 	ef->fileLen = 0x40;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00", ef->data, 0);
+	charString2ByteString("FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00 FF FF FF 00 00",
+		ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -758,9 +772,10 @@ FileDesc* creatEF_PNN() {
 	ef->fileLen = ef->recordCnt * ef->recordLen;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("43 0D 52 45 44 54 45 41 20 4D 4F 42 49 4C 45 45 06 52 45 44 54 45 41", ef->data, 0);
+	charString2ByteString("43 0D 52 45 44 54 45 41 20 4D 4F 42 49 4C 45 45 06 52 45 44 54 45 41", 
+		ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	return ef;
 }
 
@@ -781,9 +796,9 @@ FileDesc* creatEF_PSLOCI() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF FF FF FF FF FF FF FF FF FE 00 01", ef->data, 0);
+	charString2ByteString("FF FF FF FF FF FF FF FF FF FF FF FE 00 01", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -805,9 +820,9 @@ FileDesc* creatEF_SPDI() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("A3 0B 80 09 64 F0 00 64 F0 10 64 F0 30", ef->data, 0);
+	charString2ByteString("A3 0B 80 09 64 F0 00 64 F0 10 64 F0 30", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -825,12 +840,12 @@ FileDesc* creatEF_SPN() {
 	ef->arrRef.arrRecordNum = 1;
 	ef->filetype = EF;
 	ef->eftype = TRANSPARENT;
-	ef->fileLen = 0x20;
+	ef->fileLen = 17;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("00 80 7E A2 83 36 79 FB 52 A8 FF FF FF FF FF FF FF", ef->data, 0);
+	charString2ByteString("00 80 7E A2 83 36 79 FB 52 A8 FF FF FF FF FF FF FF", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	return ef;
 }
 
@@ -851,9 +866,9 @@ FileDesc* creatEF_START_HFN() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("00 00 00 00 00 00", ef->data, 0);
+	charString2ByteString("00 00 00 00 00 00", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }
@@ -875,9 +890,9 @@ FileDesc* creatEF_THRESHOLD() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("FF FF FF", ef->data, 0);
+	charString2ByteString("FF FF FF", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 	
 	return ef;
 }
@@ -899,9 +914,9 @@ FileDesc* creatEF_UST() {
 	ef->fileLen = 0x10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("00 00 0C 04 27 36 04 00 40", ef->data, 0);
+	charString2ByteString("00 00 0C 04 27 36 04 00 40", ef->data, 0, STRING_SPACE_NOWAPE);
 
-	printFileContent(ef->data, ef->fileLen);
+	printFileContent(ef);
 
 	return ef;
 }

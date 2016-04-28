@@ -18,7 +18,7 @@ typedef struct ChannelInfo {
 	FileDesc* curEF;
 	FileDesc* curDF;
 	FileDesc* curADF;
-}ChannelInfo;
+} ChannelInfo;
 
 extern ChannelInfo channels[4];
 extern u2 curChannelID;

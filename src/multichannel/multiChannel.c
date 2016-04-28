@@ -7,7 +7,7 @@ u2 curChannelID = 0xFF;
 void initChannel() {
 	u1 i;
 	
-	for(i = 0; i < 4; i ++) {
+	for (i = 0; i < 4; i ++) {
 		closeChannelID(i);
 		channels[i].curEF = INVALID_FILE;
 		channels[i].curDF = INVALID_FILE;
@@ -18,7 +18,7 @@ void initChannel() {
 	setCurDF(MFRef);
 }
 
-int getAvailableChannel(){
+int getAvailableChannel() {
 	return 1;
 }
 

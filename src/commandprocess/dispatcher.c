@@ -1,12 +1,23 @@
 #include "../inc/types.h"
 
-void insertCard(u1* iccid, u1* imsi, u1* ki) {
+void insertCard(u1* imsi,
+				u1* ki,
+				u1* opc,
+				u1* iccid,
+				u1* acc,
+				u1* spn,
+				u1* apn,
+				u1* hplmn,
+				u1* ehplmn,
+				u1* loci,
+				u1* psloci,
+				u1* fplmn) {
 	PRINT_FUNC_NAME();
 
 	initADF();
 	MFRef = buildFileSystem();
+	configureProfile(imsi, ki, opc, iccid, acc, spn, hplmn, ehplmn, loci, psloci, fplmn);
 	initChannel();
-
 	tlv = COS_MALLOC(sizeof(TLV));
 }
 
@@ -28,7 +39,7 @@ short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
 	}
 
 	setCurChannelID(getCLS(apdu));
-	switch(ins) {
+	switch (ins) {
 		case INS_SELECT:
 			return processSelect(apdu, responseBuf, responseLen);
 		case INS_STATUS:
@@ -56,7 +67,7 @@ short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
 	}
 }
 
-short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
+short processSelect(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u1 needsFcp = 0, flag = 0;
 	FileDesc* file;
 	u2 sw = FILE_NOT_FOUND;
@@ -138,7 +149,7 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
 	return sw;
 }
 
-short processStatus(u1* apdu, u1* responseBuf, u2* responseLen){
+short processStatus(u1* apdu, u1* responseBuf, u2* responseLen) {
 	FileDesc* file;
 	u2 sw = NONE;
 
@@ -166,7 +177,7 @@ short processStatus(u1* apdu, u1* responseBuf, u2* responseLen){
 	}
 }
 
-short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen){
+short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen) {
 	if (getP1(apdu) != 0 || getP2(apdu) != 0x01) {
 		return WRONG_PARAMS;
 	}
@@ -182,7 +193,7 @@ short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen){
 	return NONE;
 }
 
-short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen){
+short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen) {
 	if (getP1(apdu) != 0 || getP2(apdu) != 0x01) {
 		return WRONG_PARAMS;
 	}
@@ -198,7 +209,7 @@ short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen){
 	return NONE;
 }
 
-short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen){
+short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u2 sw = NONE;
 	u1 newChannel = INVALID_CHANNLE_ID;
 
@@ -253,7 +264,7 @@ u1 closeChannel(u1 sChnId) {
 	}
 }
 
-short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen){
+short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen) {
 	FileDesc* file;
 	u2 offset, len, sw = NONE;
 	u2 size = getP3(apdu) & 0xFF;
@@ -285,7 +296,7 @@ short readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* respon
 	return size;
 }
 
-short processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen){
+short processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen) {
 	FileDesc* file;
 	u2 offset, len, sw = NONE;
 	u2 size = getP3(apdu) & 0xFF;
@@ -313,7 +324,7 @@ short updateBinary(FileDesc* file, u2 offset, u1* data, u1 len) {
 	return sw;
 }
 
-short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen){
+short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u1 number = getP1(apdu) & 0xFF;
 	u1 sfi = (getP2(apdu) >> 3) & 0x1F;
 	FileDesc* file;
@@ -382,7 +393,7 @@ void readRecordAbs(FileDesc* file, u1 recordNum, u1* responseBuf) {
 	COS_MEMCPY(responseBuf, file->data + file->recordLen * recordNum, file->recordLen);
 }
 
-short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen){
+short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u1 number = getP1(apdu) & 0xFF;
 	u1 sfi = (getP2(apdu) >> 3) & 0x1F;
 	FileDesc* file;
@@ -449,7 +460,7 @@ void updateRecordAbs(FileDesc* file, u1 recordNum, u1* apduData) {
 	COS_MEMCPY(file->data + file->recordLen * recordNum, apduData, file->recordLen);
 }
 
-short processAuth(u1* apdu, u1* responseBuf, u2* responseLen){
+short processAuth(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u2 sw = NONE;
 	*responseLen = 0;
 	return sw;
@@ -525,7 +536,7 @@ FileDesc* selectChildDf(FileDesc* df, u2 fid) {
 
 	PRINT_FUNC_NAME()
 	
-	while(curDF != INVALID_FILE_LIST) {
+	while (curDF != INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2	
 		printf("ChildDF[%02X]\n", curDF->me->fid);
 #endif		
@@ -544,7 +555,7 @@ FileDesc* selectChildDfSfi(FileDesc* df, u1 sfi) {
 
 	PRINT_FUNC_NAME()
 	
-	while(curDF != INVALID_FILE_LIST) {
+	while (curDF != INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2	
 		printf("ChildDF[%02X], sfi[%02X]\n", curDF->me->fid, curDF->me->sfi);
 #endif		
@@ -563,7 +574,7 @@ FileDesc* selectChildEf(FileDesc* df, u2 fid) {
 
 	PRINT_FUNC_NAME();
 	
-	while(curEF != INVALID_FILE_LIST) {
+	while (curEF != INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2	
 		printf("ChildEF[%02X]\n", curEF->me->fid);
 #endif
@@ -582,7 +593,7 @@ FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi) {
 
 	PRINT_FUNC_NAME();
 	
-	while(curEF != INVALID_FILE_LIST) {
+	while (curEF != INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2	
 		printf("ChildEF[%02X], sfi[%02X]\n", curEF->me->fid, curEF->me->sfi);
 #endif
@@ -628,7 +639,7 @@ FileDesc* selectByPathFromCurrentDf(u1* fidPath, u1 len) {
 	return selectByPath(getCurDF(), fidPath, len);
 }
 
-u2 getShort(u1* buf){
+u2 getShort(u1* buf) {
 	return (buf[0] << 8) + buf[1];
 }
 FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len) {
@@ -642,7 +653,7 @@ FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len) {
 	printf("selectByPath DF[%02X], len[%02d], step[%02d]\n", df->fid, len, step);
 #endif
 
-	while(step --){
+	while (step --) {
 		//printf("step[%02d]\n", step);
 		fid = getShort(pfid);
 #if DEBUG_LEVLE > 2	

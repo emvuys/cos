@@ -12,11 +12,17 @@
 #define OFFSET_P3	4
 #define OFFSET_DATA	5
 
+#define STRING_SPACE	1
+#define STRING_WAPE		2
+#define STRING_SPACE_NOWAPE	(STRING_SPACE)
+#define STRING_NOSPACE_WAPE	(STRING_WAPE)
+#define STRING_NOSPACE_NOWAPE	(0)
+
 typedef struct TLV {
 	u1 tag;
 	u2 offset;
 	u2 length;
-}TLV;
+} TLV;
 
 #define COS_MALLOC(size)				malloc(size)
 #define COS_FREE(s)					free(s)
@@ -42,7 +48,7 @@ typedef struct TLV {
 extern TLV* tlv;
 
 extern u1* aidString2Buffer(u1* aid, u1* aidlen);
-extern void charString2ByteString(u1* charString, u1* desBuf, u2 offset);
+void charString2ByteString(u1* charString, u1* desBuf, u2 offset, u1 flag);
 extern u1 hexToDec(u1 c);
 
 extern u1 getCLS(u1* apdu);
@@ -67,7 +73,7 @@ extern void appendTLBufferV(u1* buffer, u1 tag, u1* valBuf, u1 valOff, u1 valLen
 extern void showFS();
 extern void showFileSystem(FileDesc* mf);
 extern void showChildDFEF(FileList* fileList);
-extern void printFileContent(u1* buff, u2 length);
+extern void printFileContent(FileDesc* file);
 extern void printAPDU(u1* apdu);
 extern void printADF();
 

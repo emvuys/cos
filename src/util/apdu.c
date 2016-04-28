@@ -24,10 +24,10 @@ u1* getData(u1* apdu) {
 	return apdu + OFFSET_DATA;
 }
 
-u2 getDataByte(u1* apduData){
+u2 getDataByte(u1* apduData) {
 	return *(apduData);
 }
 
-u2 getDataShort(u1* apduData){
+u2 getDataShort(u1* apduData) {
 	return ((*(apduData + OFFSET_DATA) << 8) & 0xFF00) | (*(apduData + OFFSET_DATA + 1) & 0xFF);
 }

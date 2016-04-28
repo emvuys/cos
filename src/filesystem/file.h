@@ -63,36 +63,36 @@ typedef enum fileType {
 	ADF,
 	DF,
 	EF
-}fileType;
+} fileType;
 
 typedef enum efType {
 	TRANSPARENT,
 	LINEAR,
 	CIRCLE,
 	BERSTUCT
-}efType;
+} efType;
 
 enum fileAccess {
 	UNSHAREABLE,
 	SHAREABLE
-}fileAccess;
+} fileAccess;
 
 
 typedef struct AIDFileDes {
 	u1* aid;
 	u1 aidLen;
 	struct FileDesc* file;
-}AIDFileDes;
+} AIDFileDes;
 
 typedef struct ArrRef {
 	u2 arrFid;
 	u1 arrRecordNum;
-}ArrRef;
+} ArrRef;
 
 typedef struct FileList {
 	struct FileDesc *me;
 	struct FileList *next;
-}FileList;
+} FileList;
 
 typedef struct FileDesc {
 	u2 fid;
@@ -111,7 +111,22 @@ typedef struct FileDesc {
 	u1 recordLen;
 	u1 recordCnt;
 	u1 recordPointer;
-}FileDesc;
+} FileDesc;
+
+typedef struct Profile {
+	FileDesc* imsi;
+	FileDesc* ki;
+	FileDesc* opc;
+	FileDesc* iccid;
+	FileDesc* acc;
+	FileDesc* spn;
+	FileDesc* apn;	
+	FileDesc* hplmn;
+	FileDesc* ehplmn;
+	FileDesc* loci;
+	FileDesc* psloci;
+	FileDesc* fplmn;
+} Profile;
 
 extern u1 isFileEF(FileDesc* file);
 
@@ -135,6 +150,29 @@ extern void getFilesize(FileDesc* file, u1* resBuf);
 extern void getTotalfilesize(FileDesc* file, u1* resBuf);
 extern void getShortFileIdentifier(FileDesc* file, u1* resBuf);
 extern void getPINStatusTemplateDO(FileDesc* file, u1* resBuf);
+
+extern void configureProfile(	u1* imsi,
+							u1* ki,
+							u1* opc,
+							u1* iccid,
+							u1* acc,
+							u1* spn,
+							u1* hplmn,
+							u1* ehplmn,
+							u1* loci,
+							u1* psloci,
+							u1* fplmn );
+extern void configIMSI(u1* imsi);
+extern void configKI(u1* ki);
+extern void configOPC(u1* opc);
+extern void configICCID(u1* iccid);
+extern void configACC(u1* acc);
+extern void configSPN(u1* spn);
+extern void configHPLMN(u1* hplmn);
+extern void configEHPLMN(u1* ehplmn);
+extern void configLOCI(u1* loci);
+extern void configPSLOCI(u1* psloci);
+extern void configFPLMN(u1* fplmn);
 
 #endif
 
