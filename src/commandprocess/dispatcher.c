@@ -1,13 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "../filesystem/filetype.h"
-#include "../filesystem/fileSystem.h"
 #include "../inc/types.h"
-
-FileDesc* MFRef;
-FileDesc* AdfUsimRef;
-
-TLV* tlv;
 
 void insertCard(u1* iccid, u1* imsi, u1* ki) {
 	PRINT_FUNC_NAME();
@@ -19,37 +10,6 @@ void insertCard(u1* iccid, u1* imsi, u1* ki) {
 	tlv = COS_MALLOC(sizeof(TLV));
 }
 
-void showFS() {
-	showFileSystem(MFRef);
-}
-
-
-
-u1 getCLS(u1* apdu) {
-	return *(apdu + OFFSET_CLS);
-}
-u1 getINS(u1* apdu) {
-	return *(apdu + OFFSET_INS);
-}
-u1 getP1(u1* apdu) {
-	return *(apdu + OFFSET_P1);
-}
-u1 getP2(u1* apdu) {
-	return *(apdu + OFFSET_P2);
-}
-u1 getP3(u1* apdu) {
-	return *(apdu + OFFSET_P3);
-}
-u1* getData(u1* apdu) {
-	return apdu + OFFSET_DATA;
-}
-u2 getDataByte(u1* apduData){
-	return *(apduData);
-}
-u2 getDataShort(u1* apduData){
-	return ((*(apduData + OFFSET_DATA) << 8) & 0xFF00) | (*(apduData + OFFSET_DATA + 1) & 0xFF);
-}
-
 short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u1 ins = getINS(apdu);
 
@@ -57,13 +17,13 @@ short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
 	printAPDU(apdu);
 
 	printf("Chn: %02X\n", getCurChannelID());
-	if(getCurEF() != INVALID_FILE) {
+	if (getCurEF() != INVALID_FILE) {
 		printf("CurEF: %02X\n", getCurEF()->fid);
 	}
-	if(getCurDF() != INVALID_FILE) {
+	if (getCurDF() != INVALID_FILE) {
 		printf("CurDF: %02X\n", getCurDF()->fid);
 	}
-	if(getCurADF() != INVALID_FILE) {
+	if (getCurADF() != INVALID_FILE) {
 		printf("CurAD: %02X\n", getCurADF()->fid);
 	}
 
@@ -96,23 +56,6 @@ short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
 	}
 }
 
-void printAPDU(u1* apdu) {
-	u2 i = 0, p3 = getP3(apdu);
-	
-	printf("APDU< %02X%02X%02X%02X%02X", 
-		getCLS(apdu),
-		getINS(apdu),
-		getP1(apdu),
-		getP2(apdu),
-		getP3(apdu)
-		);
-
-	while(p3 --) {
-		printf("%02X",  *(apdu + OFFSET_DATA + (i ++)));
-	}
-	printf(" >\n");
-}
-
 short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
 	u1 needsFcp = 0, flag = 0;
 	FileDesc* file;
@@ -121,9 +64,7 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
 	PRINT_FUNC_NAME();
 
 	//printADF();
-
 	
-
 	switch ((getP2(apdu) >> 2) & 0x07) {
 		case 1: 
 			needsFcp = 1;
@@ -138,9 +79,9 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
 
 	switch (getP1(apdu)) {
 		case 0x00: // select MF
-			if(getP3(apdu) == 0) {
+			if (getP3(apdu) == 0) {
 				file = selectFId(MF);
-			} else if(getP3(apdu) != 2) {
+			} else if (getP3(apdu) != 2) {
 				return WRONG_PARAMS;
 			} else {
 				file = selectFId(getDataShort(apdu));
@@ -157,13 +98,13 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
 			file = selectbyAID(getData(apdu), getP3(apdu), flag);
 			break;
 		case 0x08: //selectByPathFromMf
-			if(getP3(apdu) % 2 != 0) {
+			if (getP3(apdu) % 2 != 0) {
 				return WRONG_DATA;
 			}
 			file = selectByPathFromMf(getData(apdu), getP3(apdu));
 			break;
 		case 0x09:
-			if(getP3(apdu) % 2 != 0) {
+			if (getP3(apdu) % 2 != 0) {
 				return WRONG_DATA;
 			}
 			file = selectByPathFromCurrentDf(getData(apdu), getP3(apdu));
@@ -172,44 +113,31 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen){
 			return WRONG_PARAMS;
 	}
 
-	if( file != INVALID_FILE) {
+	if ( file != INVALID_FILE) {
 		sw = NONE;
 
-		if((file->filetype == DF) || (file->filetype == MF) || (file->filetype == ADF)) {
+		if ((file->filetype == DF) || (file->filetype == MF) || (file->filetype == ADF)) {
 			setCurDF(file);
-			if(file->filetype == ADF) {
+			if (file->filetype == ADF) {
 				setCurADF(file);
 			}
 			setCurEF(INVALID_FILE);
-		}
-		else if(file->filetype == EF) {
+		} else if (file->filetype == EF) {
 			setCurEF(file);
 		}
-	
 
-		if(needsFcp != 0) {
-			/*
-			needsFcp = 0;
-			responseBuf[needsFcp ++] = needsFcp;
-			responseBuf[needsFcp ++] = needsFcp;
-			responseBuf[needsFcp ++] = needsFcp;
-			responseBuf[needsFcp ++] = needsFcp;
-			responseBuf[needsFcp ++] = needsFcp;
-			responseBuf[needsFcp ++] = needsFcp;
-			*responseLen = needsFcp;
-			*/
+		if (needsFcp != 0) {
 			getFCP(file, responseBuf);
 			*responseLen = getCurTLVLen() + 2;
 		}
 		else {
 			*responseLen = 0;
 		}
-		
 	}
-
 	
 	return sw;
 }
+
 short processStatus(u1* apdu, u1* responseBuf, u2* responseLen){
 	FileDesc* file;
 	u2 sw = NONE;
@@ -239,7 +167,7 @@ short processStatus(u1* apdu, u1* responseBuf, u2* responseLen){
 }
 
 short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen){
-	if(getP1(apdu) != 0 || getP2(apdu) != 0x01) {
+	if (getP1(apdu) != 0 || getP2(apdu) != 0x01) {
 		return WRONG_PARAMS;
 	}
 	*responseLen = 0;
@@ -255,7 +183,7 @@ short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen){
 }
 
 short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen){
-	if(getP1(apdu) != 0 || getP2(apdu) != 0x01) {
+	if (getP1(apdu) != 0 || getP2(apdu) != 0x01) {
 		return WRONG_PARAMS;
 	}
 	*responseLen = 0;
@@ -280,7 +208,7 @@ short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen){
 				return WRONG_PARAMS;
 			}
 			newChannel = openChannel(getCurChannelID());
-			if(newChannel == INVALID_CHANNLE_ID) {
+			if (newChannel == INVALID_CHANNLE_ID) {
 				return LOGICAL_CHANNEL_NOT_SUPPORTED;
 			} else {
 				*responseBuf = newChannel;
@@ -329,14 +257,14 @@ short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen){
 	FileDesc* file;
 	u2 offset, len, sw = NONE;
 	u2 size = getP3(apdu) & 0xFF;
-	if((getP1(apdu) & 0x80) == 0) {
+	if ((getP1(apdu) & 0x80) == 0) {
 		offset = getP1(apdu) << 8 | getP2(apdu);
 		file = getCurEF();
 	} else {
 		offset = getP2(apdu);
 		file = selectBySfi(getP1(apdu) & 0x1F);
 	}
-	if(file == INVALID_FILE) {
+	if (file == INVALID_FILE) {
 		return NO_FILE_SELECTED;
 	}
 	*responseLen = readBinary(file, offset, size, responseBuf, responseLen);
@@ -344,12 +272,12 @@ short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen){
 }
 
 short readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* responseLen) {
-	if((offset < 0) || (offset > 0x7FFF) ||  (offset > file->fileLen) ||(size < 0) || (size > 0x7FFF)) {
+	if ((offset < 0) || (offset > 0x7FFF) ||  (offset > file->fileLen) ||(size < 0) || (size > 0x7FFF)) {
 		return WRONG_LENGTH;
 	}
-        if(size == 0) {
+        if (size == 0) {
 		size = file->fileLen - offset;
-		if(size >= 0x100) {
+		if (size >= 0x100) {
 			size = 0x100;
 		}
 	}
@@ -361,14 +289,14 @@ short processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen){
 	FileDesc* file;
 	u2 offset, len, sw = NONE;
 	u2 size = getP3(apdu) & 0xFF;
-	if((getP1(apdu) & 0x80) == 0) {
+	if ((getP1(apdu) & 0x80) == 0) {
 		offset = getP1(apdu) << 8 | getP2(apdu);
 		file = getCurEF();
 	} else {
 		offset = getP2(apdu);
 		file = selectBySfi(getP1(apdu) & 0x1F);
 	}
-	if(file == INVALID_FILE) {
+	if (file == INVALID_FILE) {
 		return NO_FILE_SELECTED;
 	}
 	updateBinary(file, offset, getData(apdu), getP3(apdu));
@@ -378,7 +306,7 @@ short processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen){
 
 short updateBinary(FileDesc* file, u2 offset, u1* data, u1 len) {
 	u2 sw = NONE;
-	if((offset < 0) || (offset > 0x7FFF) || (offset + len > file->fileLen)) {
+	if ((offset < 0) || (offset > 0x7FFF) || (offset + len > file->fileLen)) {
 		return WRONG_LENGTH;
 	}
 	COS_MEMCPY(file->data + offset, data, len);
@@ -390,13 +318,13 @@ short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen){
 	u1 sfi = (getP2(apdu) >> 3) & 0x1F;
 	FileDesc* file;
 
-	if(sfi == 0) {
+	if (sfi == 0) {
 		file = getCurEF();
 	} else {
 		file = selectBySfi(sfi);
 	}
 
-	if(file == INVALID_FILE) {
+	if (file == INVALID_FILE) {
 		return NO_FILE_SELECTED;
 	}
 
@@ -418,32 +346,32 @@ short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen){
 }
 
 void readNextRecord(FileDesc* file, u1* responseBuf) {
-	if(file->recordPointer > file->recordCnt) {
+	if (file->recordPointer > file->recordCnt) {
 		return;
 	}
 	file->recordPointer ++;
-	if(file->recordPointer ==  file->recordCnt) {
+	if (file->recordPointer ==  file->recordCnt) {
 		 file->recordPointer = 1;
 	}
 	readRecordAbs(file, 0, responseBuf);
 }
 
 void readPreviousRecord(FileDesc* file, u1* responseBuf) {
-	if(file->recordPointer < 0) {
+	if (file->recordPointer < 0) {
 		return;
 	}
 	file->recordPointer --;
-	if(file->recordPointer ==  0) {
+	if (file->recordPointer ==  0) {
 		 file->recordPointer = file->recordCnt;
 	}
 	readRecordAbs(file, 0, responseBuf);
 }
 
 void readRecordAbs(FileDesc* file, u1 recordNum, u1* responseBuf) {
-	if(file->eftype != LINEAR) {
+	if (file->eftype != LINEAR) {
 		return;
 	}
-	if((recordNum < 0) || (recordNum > file->recordCnt)) {
+	if ((recordNum < 0) || (recordNum > file->recordCnt)) {
 		return;
 	}
 
@@ -453,8 +381,6 @@ void readRecordAbs(FileDesc* file, u1 recordNum, u1* responseBuf) {
 	recordNum --;
 	COS_MEMCPY(responseBuf, file->data + file->recordLen * recordNum, file->recordLen);
 }
-
-
 
 short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen){
 	u1 number = getP1(apdu) & 0xFF;
@@ -487,32 +413,32 @@ short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen){
 }
 
 void updateNextRecord(FileDesc* file, u1* apduData) {
-	if(file->recordPointer > file->recordCnt) {
+	if (file->recordPointer > file->recordCnt) {
 		return;
 	}
 	file->recordPointer ++;
-	if(file->recordPointer ==  file->recordCnt) {
+	if (file->recordPointer ==  file->recordCnt) {
 		 file->recordPointer = 1;
 	}
 	updateRecordAbs(file, 0, apduData);
 }
 
 void updatePreviousRecord(FileDesc* file, u1* apduData) {
-	if(file->recordPointer < 0) {
+	if (file->recordPointer < 0) {
 		return;
 	}
 	file->recordPointer --;
-	if(file->recordPointer ==  0) {
+	if (file->recordPointer ==  0) {
 		 file->recordPointer = file->recordCnt;
 	}
 	updateRecordAbs(file, 0, apduData);
 }
 
 void updateRecordAbs(FileDesc* file, u1 recordNum, u1* apduData) {
-	if(file->eftype != LINEAR) {
+	if (file->eftype != LINEAR) {
 		return;
 	}
-	if((recordNum < 0) || (recordNum > file->recordCnt)) {
+	if ((recordNum < 0) || (recordNum > file->recordCnt)) {
 		return;
 	}
 
@@ -528,7 +454,6 @@ short processAuth(u1* apdu, u1* responseBuf, u2* responseLen){
 	*responseLen = 0;
 	return sw;
 }
-
 
 FileDesc* selectMF() {
 	return MFRef;
@@ -551,22 +476,22 @@ FileDesc* selectFId(u2 fid) {
 		return selectMF();
 	}
 	// 7FFF, ADF
-	if(fid == 0x7FFF) {
+	if (fid == 0x7FFF) {
 		return getCurADF();
 	}
 	// child file
 	file = selectChild(getCurDF(), fid);
-	if(file != INVALID_FILE) {
+	if (file != INVALID_FILE) {
 		return file;
 	}
 	//parent file
 	file = selectParentDf(fid);
-	if(file != INVALID_FILE) {
+	if (file != INVALID_FILE) {
 		return file;
 	}
 	//brother file
 	file = selectChild(getCurDF()->parent, fid);
-	if(file != INVALID_FILE) {
+	if (file != INVALID_FILE) {
 		return file;
 	}
 	return file;
@@ -577,7 +502,7 @@ FileDesc* selectChild(FileDesc* df, u2 fid) {
 	PRINT_FUNC_NAME();
 	
 	file = selectChildDf(df, fid);
-	if(file == INVALID_FILE) {
+	if (file == INVALID_FILE) {
 		file = selectChildEf(df, fid);
 	}
 	return file;
@@ -588,7 +513,7 @@ FileDesc* selectChildSfi(FileDesc* df, u1 sfi) {
 	PRINT_FUNC_NAME();
 	
 	file = selectChildDfSfi(df, sfi);
-	if(file == INVALID_FILE) {
+	if (file == INVALID_FILE) {
 		file = selectChildEfSfi(df, sfi);
 	}
 	return file;
@@ -604,7 +529,7 @@ FileDesc* selectChildDf(FileDesc* df, u2 fid) {
 #if DEBUG_LEVLE > 2	
 		printf("ChildDF[%02X]\n", curDF->me->fid);
 #endif		
-		if(curDF->me->fid == fid) {
+		if (curDF->me->fid == fid) {
 			file = curDF->me;
 			break;
 		}
@@ -623,7 +548,7 @@ FileDesc* selectChildDfSfi(FileDesc* df, u1 sfi) {
 #if DEBUG_LEVLE > 2	
 		printf("ChildDF[%02X], sfi[%02X]\n", curDF->me->fid, curDF->me->sfi);
 #endif		
-		if(curDF->me->sfi == sfi) {
+		if (curDF->me->sfi == sfi) {
 			file = curDF->me;
 			break;
 		}
@@ -642,7 +567,7 @@ FileDesc* selectChildEf(FileDesc* df, u2 fid) {
 #if DEBUG_LEVLE > 2	
 		printf("ChildEF[%02X]\n", curEF->me->fid);
 #endif
-		if(curEF->me->fid == fid) {
+		if (curEF->me->fid == fid) {
 			file = curEF->me;
 			break;
 		}
@@ -650,7 +575,6 @@ FileDesc* selectChildEf(FileDesc* df, u2 fid) {
 	}
 	return file;
 }
-
 
 FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi) {
 	FileDesc* file = INVALID_FILE;
@@ -662,7 +586,7 @@ FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi) {
 #if DEBUG_LEVLE > 2	
 		printf("ChildEF[%02X], sfi[%02X]\n", curEF->me->fid, curEF->me->sfi);
 #endif
-		if(curEF->me->sfi == sfi) {
+		if (curEF->me->sfi == sfi) {
 			file = curEF->me;
 			break;
 		}
@@ -676,7 +600,7 @@ FileDesc* selectParentDf(u2 fid) {
 	
 	PRINT_FUNC_NAME();
 	
-	if((file != INVALID_FILE) && (file->fid == fid)) {
+	if ((file != INVALID_FILE) && (file->fid == fid)) {
 		return file;
 	}
 	return INVALID_FILE;
@@ -688,7 +612,7 @@ FileDesc* selectbyAID(u1* aidBuf, u1 len, u1 terminal) {
 	PRINT_FUNC_NAME();
 	
 	file = getAdfFileDes(aidBuf, len);
-	if(file != INVALID_FILE) {
+	if (file != INVALID_FILE) {
 		return file;
 	}
 	return INVALID_FILE;
@@ -698,6 +622,7 @@ FileDesc* selectByPathFromMf(u1* fidPath, u1 len) {
 	PRINT_FUNC_NAME();
 	return selectByPath(getMF(), fidPath, len);
 }
+
 FileDesc* selectByPathFromCurrentDf(u1* fidPath, u1 len) {
 	PRINT_FUNC_NAME();
 	return selectByPath(getCurDF(), fidPath, len);
@@ -723,7 +648,7 @@ FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len) {
 #if DEBUG_LEVLE > 2	
 		printf("selectByPath fid[%02X]\n", fid);
 #endif
-		if(fid == 0x7FFF) {
+		if (fid == 0x7FFF) {
 			file = getCurADF();
 			pfid += 2;
 			//step --;
@@ -731,7 +656,7 @@ FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len) {
 		}
 		
 		file = selectChild(file, fid);
-		if(file == INVALID_FILE) {
+		if (file == INVALID_FILE) {
 			return INVALID_FILE;
 		}
 		pfid += 2;
@@ -739,213 +664,4 @@ FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len) {
 	
 	return file;
 }
-
-
-void printADF(){
-	u1 len, index = 0, i = 0;
-	
-	len = aidFile[index].aidLen;
-	printf("len[%02X], index[%d], aidMember: ", len, index);
-	if(len != 0) {
-		while(len --) {
-			printf("%02X",  *(aidFile[index].aid + (i ++)));
-		}
-		i = 0;
-	}
-	
-	index ++;
-	len = aidFile[index].aidLen;
-	printf("len[%02X], index[%d], aidMember: ", len, index);
-	if(len != 0) {
-		while(len --) {
-			printf("%02X",  *(aidFile[index].aid + (i ++)));
-		}
-		i = 0;
-	}
-}
-
-void getADFName(FileDesc* file, u1* resBuf) {
-	setCurTLVTag(FILE_CONTROL_PARAMETERS_TAG);
-	setCurTLVLen(0);
-	setCurTLVOff(2);
-	getDFname(file, resBuf);
-	resBuf[0] = getCurTLVTag();
-	resBuf[1] = getCurTLVLen();
-}
-void getFCP(FileDesc* file, u1* resBuf) {
-	u1 isEF = isFileEF(file);
-
-	if(file != INVALID_FILE) {
-		printf("getFCP fid[%04X]\n", file->fid);
-	} else {
-		printf("getFCP INVALID_FILE\n");
-		return;
-	}
-	
-	setCurTLVTag(FILE_CONTROL_PARAMETERS_TAG);
-
-	setCurTLVLen(0);
-	setCurTLVOff(2);
-	getFileDescriptor(file, resBuf);
-	getFileIdentifier(file, resBuf);
-	if(file->filetype == ADF) {
-		getDFname(file, resBuf);
-	}
-	getProprietaryInformation(file, resBuf);
-	getLifeCycleStatusInteger(file, resBuf);
-	getSecurityattributes(file, resBuf);
-	if(isEF) {
-		getFilesize(file, resBuf);
-		getTotalfilesize(file, resBuf);
-		getShortFileIdentifier(file, resBuf);
-	} else {
-		getPINStatusTemplateDO(file, resBuf);
-		getTotalfilesize(file, resBuf);
-	}
-
-	resBuf[0] = getCurTLVTag();
-	resBuf[1] = getCurTLVLen();
-}
-
-void getFileDescriptor(FileDesc* file, u1* resBuf) {
-	u1 fileDescByte = 0;
-	u1 bytes[5] = {0, 0x21};
-	u1 isEF = isFileEF(file);
-
-	if(file->shareble == SHAREABLE) {
-		fileDescByte |= 1 << 6;
-	}
-	if(isEF) {
-		fileDescByte |= 1 << 3;
-		switch (file->eftype) {
-			case LINEAR:
-				fileDescByte |= 1 << 1;
-				break;
-			case TRANSPARENT:
-				fileDescByte |= 1 << 0;
-				break;
-			case CIRCLE:
-				fileDescByte |= 3 << 1;
-				break;
-			case BERSTUCT:
-				fileDescByte = 0x39;
-				break;
-		}
-	} else {
-		fileDescByte |= 7 << 3;
-	}
-
-	bytes[0] = fileDescByte;
-	if(isEF && ((file->eftype == CIRCLE) || (file->eftype == LINEAR))) {
-		bytes[2] = file->recordLen >> 8;
-		bytes[3] = file->recordLen & 0xFF;
-		bytes[4] = file->recordCnt;
-		appendTLBufferV(resBuf, FILE_DESCRIPTOR_TAG, bytes, 0, 5);
-	} else if(isEF){
-		appendTLBufferV(resBuf, FILE_DESCRIPTOR_TAG, bytes, 0, 2);
-	}
-}
-
-void getFileIdentifier(FileDesc* file, u1* resBuf) {
-	appendTLShortV(resBuf, FILE_IDENTIFIER_TAG, file->fid);
-}
-
-void getDFname(FileDesc* file, u1* resBuf) {
-	u1 len;
-	u1* buf = getAdfAID(file, &len);
-	appendTLBufferV(resBuf, DF_NAME_TAG, buf, 0, len);
-}
-
-void getProprietaryInformation(FileDesc* file, u1* resBuf) {
-	u1 buf[3] = {0x80, 0x01, 0x71};
-	appendTLBufferV(resBuf, PROPRIETARY_INFORMATION_TAG, buf, 0, 3);
-}
-
-void getLifeCycleStatusInteger(FileDesc* file, u1* resBuf) {
-	appendTLByteV(resBuf, LIFE_CYCLE_STATUS_INTEGER_TAG, 5);
-}
-
-void getSecurityattributes(FileDesc* file, u1* resBuf) {
-	u1 buf[3];
-	buf[0] = file->arrRef.arrFid >> 8;
-	buf[1] = file->arrRef.arrFid & 0xFF;
-	buf[2] = file->arrRef.arrRecordNum;
-	appendTLBufferV(resBuf, SECURITY_ATTRIBUTES_TAG, buf, 0, 3);
-}
-
-void getFilesize(FileDesc* file, u1* resBuf) {
-	appendTLShortV(resBuf, FILE_SIZE_TAG, file->fileLen);
-}
-
-void getTotalfilesize(FileDesc* file, u1* resBuf) {
-	
-}
-
-void getShortFileIdentifier(FileDesc* file, u1* resBuf) {
-	appendTLByteV(resBuf, SHORT_FILE_IDENTIFIER_TAG, file->sfi);
-}
-
-void getPINStatusTemplateDO(FileDesc* file, u1* resBuf) {
-	u1 buf[6] = {0x90, 0x01, 0x00, 0x83, 0x01, 0x01};
-	appendTLBufferV(resBuf, PIN_STATUS_TEMPLATE_DO_TAG, buf, 0, 6);
-}
-
-	
-u1 isFileEF(FileDesc* file) {
-	return file->filetype == EF;
-}
-
-u2 getCurTLVTag() {
-	return tlv->tag;
-}
-u2 getCurTLVOff() {
-	return tlv->offset;
-}
-u2 getCurTLVLen() {
-	return tlv->length;
-}
-u2 setCurTLVTag(u1 tag) {
-	tlv->tag = tag;
-}
-u2 setCurTLVOff(u2 off) {
-	tlv->offset = off;
-}
-u2 setCurTLVLen(u2 len) {
-	tlv->length = len;
-}
-
-void appendTLByteV(u1* buffer, u1 tag, u1 val){
-	u2 currLen = getCurTLVLen(), currOff = getCurTLVOff(tag);
-	currLen += 3;
-	buffer[currOff ++] = tag;
-	buffer[currOff ++] = 1;
-	buffer[currOff ++] = val;
-	setCurTLVLen(currLen);
-	setCurTLVOff(currOff);
-}
-
-void appendTLShortV(u1* buffer, u1 tag, u2 val){
-	u2 currLen = getCurTLVLen(), currOff = getCurTLVOff(tag);
-	currLen += 4;
-	buffer[currOff ++] = tag;
-	buffer[currOff ++] = 2;
-	buffer[currOff ++] = val >> 8;
-	buffer[currOff ++] = val & 0xFF;
-	setCurTLVLen(currLen);
-	setCurTLVOff(currOff);
-}
-
-void appendTLBufferV(u1* buffer, u1 tag, u1* valBuf, u1 valOff, u1 valLen){
-	u2 currLen = getCurTLVLen(), currOff = getCurTLVOff(tag);
-	currLen += (valLen + 2);
-	buffer[currOff ++] = tag;
-	buffer[currOff ++] = valLen;
-	COS_MEMCPY(buffer + currOff, valBuf + valOff, valLen);
-	currOff += valLen;
-	setCurTLVLen(currLen);
-	setCurTLVOff(currOff);
-}
-
-
-
 

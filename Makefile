@@ -10,7 +10,8 @@ AR = ar
 FLAGS = 
 
 #src-y = src/vcos-logic.c
-src-y = $(wildcard src/commandprocess/*.c) $(wildcard src/multichannel/*.c) $(wildcard src/filesystem/*.c)
+src-y = $(wildcard src/commandprocess/*.c) $(wildcard src/multichannel/*.c) $(wildcard src/filesystem/*.c) \
+	$(wildcard src/util/*.c)
 #${info ${src-y}}
 
 obj-y = $(patsubst %.c, %.o, ${src-y})

@@ -1,11 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "../filesystem/filetype.h"
-#include "../filesystem/fileSystem.h"
 #include "../inc/types.h"
 
 
-#define CHANNEL_NUM		4
 ChannelInfo channels[CHANNEL_NUM];
 u2 curChannelID = 0xFF;
 
@@ -18,14 +13,13 @@ void initChannel() {
 		channels[i].curDF = INVALID_FILE;
 		channels[i].curADF = INVALID_FILE;
 	}
-	
 	openChannelID(CHANNEL_0);
 	setCurChannelID(CHANNEL_0);
 	setCurDF(MFRef);
 }
 
 int getAvailableChannel(){
-    return 1;
+	return 1;
 }
 
 u1 getCurChannelID() {
@@ -88,7 +82,7 @@ u1 getAvaibleChannlNum() {
 	u1 i;
 	while (i ++ < CHANNEL_NUM) {
 		printf("chn[%02d], status[%02d]\n", i -1, isChannelIdOpen(i - 1));
-		if(isChannelIdOpen(i - 1)) {
+		if (isChannelIdOpen(i - 1)) {
 			continue;
 		} else {
 			break;

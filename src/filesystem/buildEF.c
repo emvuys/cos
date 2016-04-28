@@ -1,19 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "filetype.h"
-#include "fileSystem.h"
-
-
+#include "../inc/types.h"
 
 FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 	u2 fid;
 	u1 index = 0;
 	FileDesc* ef = INVALID_FILE;
 
-	if(len == 0) {
+	if (len == 0) {
 		return INVALID_FILE;
 	}
-	
 	do{
 		fid = fids[index];
 #if DEBUG_LEVLE > 2	
@@ -119,12 +113,11 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 			default:
 				break;
 		}
-		if(ef != INVALID_FILE) {
+		if (ef != INVALID_FILE) {
 			addChildFile(parent, ef, EF);
 		}
 	}while(index ++ < (len - 1));
 }
-
 
 FileDesc* creatEF_ACC() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
@@ -149,6 +142,7 @@ FileDesc* creatEF_ACC() {
 		
 	return ef;
 }
+
 FileDesc* creatEF_ACL() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -171,6 +165,7 @@ FileDesc* creatEF_ACL() {
 	
 	return ef;
 }
+
 FileDesc* creatEF_AD() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -195,6 +190,7 @@ FileDesc* creatEF_AD() {
 
 	return ef;
 }
+
 FileDesc* creatEF_ARR() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -221,9 +217,9 @@ FileDesc* creatEF_ARR() {
 
 	printFileContent(ef->data, ef->fileLen);
 	
-	
 	return ef;
 }
+
 FileDesc* creatEF_ARR_SUB() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -254,10 +250,10 @@ FileDesc* creatEF_ARR_SUB() {
 		ef->data, (ef->recordLen * (index ++)));
 
 	printFileContent(ef->data, ef->fileLen);
-	
 
 	return ef;
 }
+
 FileDesc* creatEF_DIR() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -281,10 +277,10 @@ FileDesc* creatEF_DIR() {
 		ef->data, (ef->recordLen * (index ++)));
 
 	printFileContent(ef->data, ef->fileLen);
-	
 
 	return ef;
 }
+
 FileDesc* creatEF_ECC() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -308,9 +304,9 @@ FileDesc* creatEF_ECC() {
 
 	printFileContent(ef->data, ef->fileLen);
 	
-
 	return ef;
 }
+
 FileDesc* creatEF_EHPLMN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -332,9 +328,9 @@ FileDesc* creatEF_EHPLMN() {
 
 	printFileContent(ef->data, ef->fileLen);
 	
-
 	return ef;
 }
+
 FileDesc* creatEF_EST() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -358,6 +354,7 @@ FileDesc* creatEF_EST() {
 
 	return ef;
 }
+
 FileDesc* creatEF_FPLMN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -381,6 +378,7 @@ FileDesc* creatEF_FPLMN() {
 
 	return ef;
 }
+
 FileDesc* creatEF_HPLMNwAcT() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -404,6 +402,7 @@ FileDesc* creatEF_HPLMNwAcT() {
 
 	return ef;
 }
+
 FileDesc* creatEF_HPPLMN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -427,6 +426,7 @@ FileDesc* creatEF_HPPLMN() {
 
 	return ef;
 }
+
 FileDesc* creatEF_ICCID() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -450,6 +450,7 @@ FileDesc* creatEF_ICCID() {
 
 	return ef;
 }
+
 FileDesc* creatEF_IMSI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -473,6 +474,7 @@ FileDesc* creatEF_IMSI() {
 
 	return ef;
 }
+
 FileDesc* creatEF_Kc() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -496,6 +498,7 @@ FileDesc* creatEF_Kc() {
 
 	return ef;
 }
+
 FileDesc* creatEF_KcGPRS() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -518,6 +521,7 @@ FileDesc* creatEF_KcGPRS() {
 	printFileContent(ef->data, ef->fileLen);
 	return ef;
 }
+
 FileDesc* creatEF_Keys() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -541,6 +545,7 @@ FileDesc* creatEF_Keys() {
 
 	return ef;
 }
+
 FileDesc* creatEF_KeysPS() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -564,6 +569,7 @@ FileDesc* creatEF_KeysPS() {
 
 	return ef;
 }
+
 FileDesc* creatEF_LI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -587,6 +593,7 @@ FileDesc* creatEF_LI() {
 
 	return ef;
 }
+
 FileDesc* creatEF_LOCI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -610,6 +617,7 @@ FileDesc* creatEF_LOCI() {
 
 	return ef;
 }
+
 FileDesc* creatEF_NETPAR() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -633,6 +641,7 @@ FileDesc* creatEF_NETPAR() {
 
 	return ef;
 }
+
 FileDesc* creatEF_OPL() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -658,6 +667,7 @@ FileDesc* creatEF_OPL() {
 
 	return ef;
 }
+
 FileDesc* creatEF_OPLMNwAcT() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -680,6 +690,7 @@ FileDesc* creatEF_OPLMNwAcT() {
 	printFileContent(ef->data, ef->fileLen);
 	return ef;
 }
+
 FileDesc* creatEF_PL() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -703,6 +714,7 @@ FileDesc* creatEF_PL() {
 
 	return ef;
 }
+
 FileDesc* creatEF_PLMNwAcT() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -726,6 +738,7 @@ FileDesc* creatEF_PLMNwAcT() {
 
 	return ef;
 }
+
 FileDesc* creatEF_PNN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -750,6 +763,7 @@ FileDesc* creatEF_PNN() {
 	printFileContent(ef->data, ef->fileLen);
 	return ef;
 }
+
 FileDesc* creatEF_PSLOCI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -773,6 +787,7 @@ FileDesc* creatEF_PSLOCI() {
 
 	return ef;
 }
+
 FileDesc* creatEF_SPDI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -796,6 +811,7 @@ FileDesc* creatEF_SPDI() {
 
 	return ef;
 }
+
 FileDesc* creatEF_SPN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -817,6 +833,7 @@ FileDesc* creatEF_SPN() {
 	printFileContent(ef->data, ef->fileLen);
 	return ef;
 }
+
 FileDesc* creatEF_START_HFN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -840,6 +857,7 @@ FileDesc* creatEF_START_HFN() {
 
 	return ef;
 }
+
 FileDesc* creatEF_THRESHOLD() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -860,8 +878,10 @@ FileDesc* creatEF_THRESHOLD() {
 	charString2ByteString("FF FF FF", ef->data, 0);
 
 	printFileContent(ef->data, ef->fileLen);
+	
 	return ef;
 }
+
 FileDesc* creatEF_UST() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
@@ -884,51 +904,5 @@ FileDesc* creatEF_UST() {
 	printFileContent(ef->data, ef->fileLen);
 
 	return ef;
-}
-
-void charString2ByteString(u1* charString, u1* desBuf, u2 offset) {
-	u2 strlength, buflen, i;
-	u1* buf;
-	u1 left, right;
-	
-	strlength = COS_STRLEN(charString);
-	if(strlength < 3) {
-		strlength = 3;
-	}
-	buflen = (strlength + 1) / 3;
-	buf = COS_MALLOC(buflen);
-
-
-	for(i = 0; i < strlength; i += 3) {
-		left = hexToDec(*(charString + i));
-		right = hexToDec(*(charString + i + 1));
-		buf[i /3] = (left << 4) + right;
-	}
-	COS_MEMCPY(desBuf + offset, buf, buflen);
-	COS_FREE(buf);
-}
-
-u1 hexToDec(u1 c) {
-	if ('0' <= c && c <= '9') {
-		return c - '0';
-	}
-	if ('A' <= c && c <= 'F') {
-		return c - 'A' + 10;
-	}
-	if ('a' <= c && c <= 'f') {
-		return c - 'a' + 10;
-	}
-	return -1;
-}
-
-void printFileContent(u1* buff, u2 length) {
-	u2 i;
-
-	return;
-	printf("File: ");
-	for(i = 0; i < length; i ++) {
-		printf("%02X", *(buff + i));
-	}
-	printf("\n");
 }
 

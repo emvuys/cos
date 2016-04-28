@@ -1,20 +1,11 @@
+#ifndef __FILESYSTEM_H__
+#define __FILESYSTEM_H__
 
-short processSelect(u1* apdu, u1* responseBuf, u2* responseLen);
-short processStatus(u1* apdu, u1* responseBuf, u2* responseLen);
-short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen);
-short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen);
-short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen);
-short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen);
-short processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen);
-short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen);
-short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen);
-short processAuth(u1* apdu, u1* responseBuf, u2* responseLen);
+#define AID_COUNT	2
 
-short updateBinary(FileDesc* file, u2 offset, u1* data, u1 len);
-short readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* responseLen);
-
-u1 openChannel(u1 srcChnId);
-u1 closeChannel(u1 sChnId);
+extern AIDFileDes aidFile[AID_COUNT];
+extern FileDesc* MFRef;
+extern FileDesc* AdfUsimRef;
 
 extern FileDesc* buildFileSystem();
 extern FileDesc* buildDFADF(u2 fid);
@@ -24,163 +15,39 @@ extern FileDesc* buildDF_GSM_ACCESS();
 extern FileDesc* buildDF_PHONEBOOK();
 extern FileDesc* buildADF_USIM();
 
-void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType);
-void addChildEFs(FileDesc* parent, u2* fids, u2 len);
-FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len);
+extern FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len);
+extern FileDesc* creatEF_ACC();
+extern FileDesc* creatEF_ACL();
+extern FileDesc* creatEF_AD();
+extern FileDesc* creatEF_ARR();
+extern FileDesc* creatEF_ARR_SUB();
+extern FileDesc* creatEF_DIR();
+extern FileDesc* creatEF_ECC();
+extern FileDesc* creatEF_EHPLMN();
+extern FileDesc* creatEF_EST();
+extern FileDesc* creatEF_FPLMN();
+extern FileDesc* creatEF_HPLMNwAcT();
+extern FileDesc* creatEF_HPPLMN();
+extern FileDesc* creatEF_ICCID();
+extern FileDesc* creatEF_IMSI();
+extern FileDesc* creatEF_Kc();
+extern FileDesc* creatEF_KcGPRS();
+extern FileDesc* creatEF_Keys();
+extern FileDesc* creatEF_KeysPS();
+extern FileDesc* creatEF_LI();
+extern FileDesc* creatEF_LOCI();
+extern FileDesc* creatEF_NETPAR();
+extern FileDesc* creatEF_OPL();
+extern FileDesc* creatEF_OPLMNwAcT();
+extern FileDesc* creatEF_PL();
+extern FileDesc* creatEF_PLMNwAcT();
+extern FileDesc* creatEF_PNN();
+extern FileDesc* creatEF_PSLOCI();
+extern FileDesc* creatEF_SPDI();
+extern FileDesc* creatEF_SPN();
+extern FileDesc* creatEF_START_HFN();
+extern FileDesc* creatEF_THRESHOLD();
+extern FileDesc* creatEF_UST();
 
-FileDesc* creatEF_ACC();
-FileDesc* creatEF_ACL();
-FileDesc* creatEF_AD();
-FileDesc* creatEF_ARR();
-FileDesc* creatEF_ARR_SUB();
-FileDesc* creatEF_DIR();
-FileDesc* creatEF_ECC();
-FileDesc* creatEF_EHPLMN();
-FileDesc* creatEF_EST();
-FileDesc* creatEF_FPLMN();
-FileDesc* creatEF_HPLMNwAcT();
-FileDesc* creatEF_HPPLMN();
-FileDesc* creatEF_ICCID();
-FileDesc* creatEF_IMSI();
-FileDesc* creatEF_Kc();
-FileDesc* creatEF_KcGPRS();
-FileDesc* creatEF_Keys();
-FileDesc* creatEF_KeysPS();
-FileDesc* creatEF_LI();
-FileDesc* creatEF_LOCI();
-FileDesc* creatEF_NETPAR();
-FileDesc* creatEF_OPL();
-FileDesc* creatEF_OPLMNwAcT();
-FileDesc* creatEF_PL();
-FileDesc* creatEF_PLMNwAcT();
-FileDesc* creatEF_PNN();
-FileDesc* creatEF_PSLOCI();
-FileDesc* creatEF_SPDI();
-FileDesc* creatEF_SPN();
-FileDesc* creatEF_START_HFN();
-FileDesc* creatEF_THRESHOLD();
-FileDesc* creatEF_UST();
-
-void showFileSystem(FileDesc* mf);
-void showChildDFEF(FileList* fileList);
-
-void charString2ByteString(u1* charString, u1* desBuf, u2 offset);
-u1 hexToDec(u1 c);
-
-void printFileContent(u1* buff, u2 length);
-
-void insertCard(u1* iccid, u1* imsi, u1* ki);
-
-void showFS();
-
-
-u1 getCLS(u1* apdu);
-u1 getINS(u1* apdu);
-u1 getP1(u1* apdu);
-u1 getP2(u1* apdu);
-u1 getP3(u1* apdu) ;
-u1* getData(u1* apdu);
-u2 getDataByte(u1* apduData);
-u2 getDataShort(u1* apduData);
-
-
-FileDesc* selectChild(FileDesc* df, u2 fid);
-FileDesc* selectChildDf(FileDesc* df, u2 fid);
-FileDesc* selectChildEf(FileDesc* df, u2 fid);
-FileDesc* selectFId(u2 fid);
-FileDesc* selectBySfi(u1 fid);
-FileDesc* selectParentDf(u2 fid);
-FileDesc* selectbyAID(u1* aidBuf, u1 len, u1 terminal);
-FileDesc* selectByPathFromMf(u1* fidPath, u1 len);
-FileDesc* selectByPathFromCurrentDf(u1* fidPath, u1 len);
-
-short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen);
-void readNextRecord(FileDesc* file, u1* responseBuf);
-void readPreviousRecord(FileDesc* file, u1* responseBuf);
-void readRecordAbs(FileDesc* file, u1 recordNum, u1* responseBuf);
-short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen);
-void updateNextRecord(FileDesc* file, u1* apduData);
-void updatePreviousRecord(FileDesc* file, u1* apduData);
-void updateRecordAbs(FileDesc* file, u1 recordNum, u1* apduData);
-
-void getADFName(FileDesc* file, u1* resBuf);
-
-extern ChannelInfo channels[4];
-extern u2 curChannelID;
-extern FileDesc* MFRef;
-extern u2 curChannelID;
-
-void initChannel();
-
-
-int getAvailableChannel();
-u1 getCurChannelID() ;
-void setCurChannelID(u1 cls);
-ChannelInfo getChannelInfoFromChannelID(u1 channelID);
-u1 isChannelIdOpen(u1 channelId);
-void openChannelID(u1 channelId);
-void closeChannelID(u1 channelId);
-
-FileDesc* getMF();
-FileDesc* getCurEF();
-void setCurEF(FileDesc* pfile);
-FileDesc* getCurDF();
-void setCurDF(FileDesc* pfile);
-void setCurDFonChn(FileDesc* pfile, u1 chn);
-FileDesc* getCurADF();
-void setCurADF(FileDesc* pfile);
-
-FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len);
-
-void initADF();
-void addAdfAid(u1 * aid, FileDesc* file, u1 index);
-u1* aidString2Buffer(u1* aid, u1* aidlen);
-
-
-FileDesc* getAdfFileDes(u1* aid, u1 aidLen);
-
-void printAPDU(u1* apdu);
-
-#define AID_COUNT	2
-extern AIDFileDes aidFile[AID_COUNT];
-
-extern FileDesc* AdfUsimRef;
-
-extern TLV* tlv;
-
-void printADF();
-
-u1 getAvaibleChannlNum();
-void copyChannelInfo(u1 srcChn, u1 DesChn);
-
-
-u1 isFileEF(FileDesc* file);
-u2 getCurTLVTag();
-u2 getCurTLVOff();
-u2 getCurTLVLen();
-u2 setCurTLVTag(u1 tag);
-u2 setCurTLVOff(u2 off);
-u2 setCurTLVLen(u2 len);
-void appendTLByteV(u1* buffer, u1 tag, u1 val);
-void appendTLShortV(u1* buffer, u1 tag, u2 val);
-void appendTLBufferV(u1* buffer, u1 tag, u1* valBuf, u1 valOff, u1 valLen);
-
-
-u1* getAdfAID(FileDesc* file, u1* aidLen);
-void getFCP(FileDesc* file, u1* resBuf);
-void getFileDescriptor(FileDesc* file, u1* resBuf);
-void getFileIdentifier(FileDesc* file, u1* resBuf);
-void getDFname(FileDesc* file, u1* resBuf);
-void getProprietaryInformation(FileDesc* file, u1* resBuf);
-void getLifeCycleStatusInteger(FileDesc* file, u1* resBuf);
-void getSecurityattributes(FileDesc* file, u1* resBuf);
-void getFilesize(FileDesc* file, u1* resBuf);
-void getTotalfilesize(FileDesc* file, u1* resBuf);
-void getShortFileIdentifier(FileDesc* file, u1* resBuf);
-void getPINStatusTemplateDO(FileDesc* file, u1* resBuf);
-
-
-FileDesc* selectChildSfi(FileDesc* df, u1 sfi);
-FileDesc* selectChildDfSfi(FileDesc* df, u1 sfi);
-FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi);
+#endif
 
