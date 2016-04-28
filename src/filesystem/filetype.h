@@ -42,6 +42,7 @@
 #define EF_UST			0x6F38
 
 
+
 #define OFFSET_CLS	0
 #define OFFSET_INS	1
 #define OFFSET_P1	2
