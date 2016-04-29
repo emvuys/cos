@@ -189,7 +189,7 @@ FileDesc* creatEF_AD() {
 	ef->arrRef.arrRecordNum= 1;
 	ef->filetype = EF;
 	ef->eftype = TRANSPARENT;
-	ef->fileLen = 0x10;
+	ef->fileLen = 4;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
 	charString2ByteString("00 00 00 02", ef->data, 0, STRING_SPACE_NOWAPE);
@@ -330,7 +330,7 @@ FileDesc* creatEF_EHPLMN() {
 	ef->arrRef.arrRecordNum= 3;
 	ef->filetype = EF;
 	ef->eftype = TRANSPARENT;
-	ef->fileLen = 0x10;
+	ef->fileLen = 0x0C;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
 	charString2ByteString("FF FF FF", ef->data, 0, STRING_SPACE_NOWAPE);
@@ -619,7 +619,7 @@ FileDesc* creatEF_LOCI() {
 	ef->arrRef.arrRecordNum=4;
 	ef->filetype = EF;
 	ef->eftype = TRANSPARENT;
-	ef->fileLen = 0x10;
+	ef->fileLen = 11;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
 	charString2ByteString("FF FF FF FF FF FF FF FF FE 00 01", ef->data, 0, STRING_SPACE_NOWAPE);
@@ -793,7 +793,7 @@ FileDesc* creatEF_PSLOCI() {
 	ef->arrRef.arrRecordNum = 4;
 	ef->filetype = EF;
 	ef->eftype = TRANSPARENT;
-	ef->fileLen = 0x10;
+	ef->fileLen = 14;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
 	charString2ByteString("FF FF FF FF FF FF FF FF FF FF FF FE 00 01", ef->data, 0, STRING_SPACE_NOWAPE);

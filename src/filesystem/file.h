@@ -58,6 +58,8 @@
 #define PIN_STATUS_TEMPLATE_DO_TAG		0xC6
 #define UICC_CHARACTERISTICS_TAG			0x80
 
+#define PMLNS_SPLITER		(';')
+
 typedef enum fileType {
 	MF,
 	ADF,

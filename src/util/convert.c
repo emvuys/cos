@@ -29,6 +29,29 @@ void charString2ByteString(u1* charString, u1* desBuf, u2 offset, u1 flag) {
 	COS_FREE(buf);
 }
 
+void convetPLMNs(u1* plmns, u1* desBuf, u1 spliter) {
+	u1 len = COS_STRLEN(plmns), i, j, k, off = 0;
+	u1 buf[6];
+	for (i = 0; i < len;) {
+		for (j = 0; j < 6; j ++) {
+			if (plmns[i + j] == spliter) {
+				break;
+			}
+		}
+		if(j == 5) {
+			COS_MEMCPY(buf, plmns + i, 3);
+			buf[3] = 'F';
+			COS_MEMCPY(buf + 3, plmns + i + 3, 2);
+		} else if(j == 6) {
+			COS_MEMCPY(buf, plmns + i, j);
+		} else {
+			return; // invalid mccmnc
+		}
+		charString2ByteString(buf, desBuf, off, STRING_WAPE);
+		i += (j + 1);
+	}
+}
+
 u1 hexToDec(u1 c) {
 	if ('0' <= c && c <= '9') {
 		return c - '0';

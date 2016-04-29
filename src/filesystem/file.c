@@ -293,6 +293,9 @@ void configureProfile(	u1* imsi,
 
 void configIMSI(u1* imsi) {
 	u1 buf[18], len = COS_STRLEN(imsi);
+	if (len == 0) {
+		return;
+	}
 	COS_MEMSET(buf, 'F', sizeof(buf));
 	buf[0] = (len + 1) / 2 + '0';
 	buf[1] = '0';
@@ -321,6 +324,10 @@ void configICCID(u1* iccid) {
 }
 
 void configACC(u1* acc) {
+	u1 len = COS_STRLEN(acc);
+	if (len == 0) {
+		return;
+	}
 	charString2ByteString(acc, profile->acc->data, 0, STRING_NOSPACE_NOWAPE);
 	printFileContent(profile->acc);
 }
@@ -337,6 +344,10 @@ u1 isASCII(u1* buf) {
 }
 void configSPN(u1* spn) {
 	u1 buf[17], len = COS_STRLEN(spn);
+
+	if (len == 0) {
+		return;
+	}
 	COS_MEMSET(buf, 0xFF, sizeof(buf));
 
 	buf[0] = 00;
@@ -357,21 +368,58 @@ void configSPN(u1* spn) {
 }
 
 void configHPLMN(u1* hplmn) {
-	
+	u1 len = COS_STRLEN(hplmn);
+	if (len == 0) {
+		return;
+	}
+	if ((len != 5) && (len != 6)) {
+		return;
+	}
+	profile->hplmn->data[3] = len -3;
+	printFileContent(profile->hplmn);
 }
 
 void configEHPLMN(u1* ehplmn) {
-	
+	u1 len = COS_STRLEN(ehplmn);
+	if (len == 0) {
+		return;
+	}
+	convetPLMNs(ehplmn, profile->ehplmn->data, PMLNS_SPLITER);
+	printFileContent(profile->ehplmn);
 }
 
-void configLOCI(u1* loci) {
-	charString2ByteString(loci, profile->loci->data, 0, STRING_NOSPACE_NOWAPE);
+void configLOCI(u1* rplmn) {
+	u1 len = COS_STRLEN(rplmn);
+	u1 buf[7];	
+	if (len == 0) {
+		return;
+	}
+	COS_MEMCPY(buf, rplmn, len);
+	buf[len] = PMLNS_SPLITER;
+	convetPLMNs(rplmn, profile->psloci->data+4, PMLNS_SPLITER);
+	profile->psloci->data[10] = 0;
+	printFileContent(profile->loci);
 }
 
-void configPSLOCI(u1* psloci) {
-	charString2ByteString(psloci, profile->psloci->data, 0, STRING_NOSPACE_NOWAPE);
+void configPSLOCI(u1* rplmn) {
+	u1 len = COS_STRLEN(rplmn);
+	u1 buf[7];	
+	if (len == 0) {
+		return;
+	}
+	COS_MEMCPY(buf, rplmn, len);
+	buf[len] = PMLNS_SPLITER;
+	convetPLMNs(rplmn, profile->psloci->data + 7, PMLNS_SPLITER);
+	profile->psloci->data[13] = 0;
+	printFileContent(profile->psloci);
 }
 
 void configFPLMN(u1* fplmn) {
-	
+	u1 len = COS_STRLEN(fplmn);
+	if (len == 0) {
+		return;
+	}
+	convetPLMNs(fplmn, profile->fplmn->data, PMLNS_SPLITER);
+	printFileContent(profile->fplmn);
 }
+

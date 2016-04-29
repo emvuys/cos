@@ -48,7 +48,8 @@ typedef struct TLV {
 extern TLV* tlv;
 
 extern u1* aidString2Buffer(u1* aid, u1* aidlen);
-void charString2ByteString(u1* charString, u1* desBuf, u2 offset, u1 flag);
+extern void convetPLMNs(u1* plmns, u1* desBuf, u1 spliter);
+extern void charString2ByteString(u1* charString, u1* desBuf, u2 offset, u1 flag);
 extern u1 hexToDec(u1 c);
 
 extern u1 getCLS(u1* apdu);
