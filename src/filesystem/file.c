@@ -159,7 +159,7 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 		PRINT_STR("pfileList is INVALID_FILE_LIST");
 		pNew = COS_MALLOC(sizeof(FileList));
 #if DEBUG_LEVLE > 2			
-		printf("COS_MALLOC addr[0x%4X]======\n", (int)pNew);
+		printf("COS_MALLOC addr[0x%4X]======\n", (u4)pNew);
 #endif		
 		COS_MEMSET(pNew, 0, sizeof(FileList));
 		pNew->me = file;
@@ -169,17 +169,17 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 		PRINT_STR("pfileList is NOT INVALID_FILE_LIST");
 		p = *pfileList;
 #if DEBUG_LEVLE > 2	
-		printf("pfileList addr[0x%4X], fid[0x%02X]======\n", (int)p, p->me->fid);
+		printf("pfileList addr[0x%4X], fid[0x%02X]======\n", (u4)p, p->me->fid);
 #endif
 		while (p->next!= INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2		
-			printf("pfileList addr next[0x%4X], fid[0x%02X]======\n", (int)(p->next), p->me->fid);
+			printf("pfileList addr next[0x%4X], fid[0x%02X]======\n", (u4)(p->next), p->me->fid);
 #endif
 			p = p->next;
 		}
 		pNew = COS_MALLOC(sizeof(FileList));
 #if DEBUG_LEVLE > 2		
-		printf("COS_MALLOC addr[0x%4X]======\n", (int)pNew);
+		printf("COS_MALLOC addr[0x%4X]======\n", (u4)pNew);
 #endif
 		COS_MEMSET(pNew, 0, sizeof(FileList));
 		pNew->me = file;

@@ -137,6 +137,17 @@ void printAPDU(u1* apdu) {
 	printf(" >\n");
 }
 
+
+void printRepon(u1* resp, short len) {
+	u2 i = 0;
+
+	printf("$ ");
+	while(len --) {
+		printf("%02X",  *(resp + (i ++)));
+	}
+	printf(" $\n");
+}
+
 void showFS() {
 	showFileSystem(MFRef);
 }

@@ -19,6 +19,8 @@ void insertCard(u1* imsi,
 	configureProfile(imsi, ki, opc, iccid, acc, spn, hplmn, ehplmn, loci, psloci, fplmn);
 	initChannel();
 	tlv = COS_MALLOC(sizeof(TLV));
+
+	initAuth(ki, opc);
 }
 
 short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
@@ -461,9 +463,11 @@ void updateRecordAbs(FileDesc* file, u1 recordNum, u1* apduData) {
 }
 
 short processAuth(u1* apdu, u1* responseBuf, u2* responseLen) {
-	u2 sw = NONE;
-	*responseLen = 0;
-	return sw;
+	u1 rand[16];
+	u1 authToken[16];
+	COS_MEMCPY(rand, apdu + OFFSET_DATA + 1, 16);
+	COS_MEMCPY(authToken, apdu + OFFSET_DATA + 18, 16);	
+	return Auth(rand, authToken, responseBuf, responseLen);
 }
 
 FileDesc* selectMF() {

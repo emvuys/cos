@@ -76,6 +76,7 @@ extern void showFileSystem(FileDesc* mf);
 extern void showChildDFEF(FileList* fileList);
 extern void printFileContent(FileDesc* file);
 extern void printAPDU(u1* apdu);
+void printRepon(u1* resp, short len);
 extern void printADF();
 
 #endif

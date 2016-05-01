@@ -18,7 +18,7 @@ void initChannel() {
 	setCurDF(MFRef);
 }
 
-int getAvailableChannel() {
+u4 getAvailableChannel() {
 	return 1;
 }
 

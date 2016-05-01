@@ -8,6 +8,10 @@ typedef unsigned char u1;
 typedef unsigned short u2;
 typedef unsigned int u4;
 
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+
 typedef u1 s1;
 typedef short s2;
 typedef int s4;
@@ -24,6 +28,7 @@ typedef int s4;
 #include "../multichannel/multiChannel.h"
 #include "../commandprocess/dispatcher.h"
 #include "../filesystem/fileSystem.h"
+#include "../authenticate/auth.h"
 
 #endif
 

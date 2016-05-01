@@ -11,7 +11,7 @@ FLAGS =
 
 #src-y = src/vcos-logic.c
 src-y = $(wildcard src/commandprocess/*.c) $(wildcard src/multichannel/*.c) $(wildcard src/filesystem/*.c) \
-	$(wildcard src/util/*.c)
+	$(wildcard src/util/*.c) $(wildcard src/authenticate/*.c)
 #${info ${src-y}}
 
 obj-y = $(patsubst %.c, %.o, ${src-y})
