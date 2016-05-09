@@ -1,33 +1,40 @@
 #include "../inc/types.h"
 
-u1 getCLS(u1* apdu) {
-	return *(apdu + OFFSET_CLS);
+APDU apduCommand;
+
+u1 getCLS() {
+	return apduCommand.cla;
 }
 
-u1 getINS(u1* apdu) {
-	return *(apdu + OFFSET_INS);
+u1 getINS() {
+	return apduCommand.ins;
 }
 
-u1 getP1(u1* apdu) {
-	return *(apdu + OFFSET_P1);
+u1 getP1() {
+	return apduCommand.p1;
 }
 
-u1 getP2(u1* apdu) {
-	return *(apdu + OFFSET_P2);
+u1 getP2() {
+	return apduCommand.p2;
 }
 
-u1 getP3(u1* apdu) {
-	return *(apdu + OFFSET_P3);
+u1 getLc() {
+	return apduCommand.lc;
 }
 
-u1* getData(u1* apdu) {
-	return apdu + OFFSET_DATA;
+u1 getLe() {
+	return apduCommand.le;
 }
 
-u2 getDataByte(u1* apduData) {
-	return *(apduData);
+u1* getData() {
+	return apduCommand.data;
 }
 
-u2 getDataShort(u1* apduData) {
-	return ((*(apduData + OFFSET_DATA) << 8) & 0xFF00) | (*(apduData + OFFSET_DATA + 1) & 0xFF);
+u2 getDataByte() {
+	return *(getData());
 }
+
+u2 getDataShort() {
+	return ((*(getData()) << 8) & 0xFF00) | (*(getData() + 1) & 0xFF);
+}
+

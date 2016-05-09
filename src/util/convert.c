@@ -89,7 +89,7 @@ void printFileContent(FileDesc* file) {
 	u1* buff = file->data;
 	u2 length = file->fileLen;
 
-	//return;
+	return;
 	printf("Fid[%02X] ", file->fid);
 	for (i = 0; i < length; i ++) {
 		printf("%02X", *(buff + i));
@@ -120,25 +120,25 @@ void printADF() {
 	}
 }
 
-void printAPDU(u1* apdu) {
-	u2 i = 0, p3 = getP3(apdu);
+void printAPDU() {
+	u2 i = 0, p3 = getLc();
 	
 	printf("APDU< %02X%02X%02X%02X%02X", 
-		getCLS(apdu),
-		getINS(apdu),
-		getP1(apdu),
-		getP2(apdu),
-		getP3(apdu)
+		getCLS(),
+		getINS(),
+		getP1(),
+		getP2(),
+		getLc()
 		);
 
 	while (p3 --) {
-		printf("%02X",  *(apdu + OFFSET_DATA + (i ++)));
+		printf("%02X",  *(getData() + (i ++)));
 	}
 	printf(" >\n");
 }
 
 
-void printRepon(u1* resp, short len) {
+void printRepon(u1* resp, u2 len) {
 	u2 i = 0;
 
 	printf("$ ");

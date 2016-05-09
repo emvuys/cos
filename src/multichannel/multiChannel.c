@@ -18,10 +18,6 @@ void initChannel() {
 	setCurDF(MFRef);
 }
 
-u4 getAvailableChannel() {
-	return 1;
-}
-
 u1 getCurChannelID() {
 	return curChannelID;
 }

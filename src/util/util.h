@@ -24,6 +24,16 @@ typedef struct TLV {
 	u2 length;
 } TLV;
 
+typedef struct APDU{
+	u1 cla;
+	u1 ins;
+	u1 p1;
+	u1 p2;
+	u1 lc;
+	u1 le;
+	u1* data;
+}APDU;
+
 #define COS_MALLOC(size)				malloc(size)
 #define COS_FREE(s)					free(s)
 #define COS_MEMSET(buf, val, size)		memset(buf, val, size)
@@ -46,20 +56,22 @@ typedef struct TLV {
 #endif
 
 extern TLV* tlv;
+extern APDU apduCommand;
 
 extern u1* aidString2Buffer(u1* aid, u1* aidlen);
 extern void convetPLMNs(u1* plmns, u1* desBuf, u1 spliter);
 extern void charString2ByteString(u1* charString, u1* desBuf, u2 offset, u1 flag);
 extern u1 hexToDec(u1 c);
 
-extern u1 getCLS(u1* apdu);
-extern u1 getINS(u1* apdu);
-extern u1 getP1(u1* apdu);
-extern u1 getP2(u1* apdu);
-extern u1 getP3(u1* apdu) ;
-extern u1* getData(u1* apdu);
-extern u2 getDataByte(u1* apduData);
-extern u2 getDataShort(u1* apduData);
+extern u1 getCLS();
+extern u1 getINS();
+extern u1 getP1();
+extern u1 getP2();
+extern u1 getLc();
+extern u1 getLe();
+extern u1* getData();
+extern u2 getDataByte();
+extern u2 getDataShort();
 
 extern u2 getCurTLVTag();
 extern u2 getCurTLVOff();
@@ -75,8 +87,8 @@ extern void showFS();
 extern void showFileSystem(FileDesc* mf);
 extern void showChildDFEF(FileList* fileList);
 extern void printFileContent(FileDesc* file);
-extern void printAPDU(u1* apdu);
-void printRepon(u1* resp, short len);
+extern void printAPDU();
+void printRepon(u1* resp, u2 len);
 extern void printADF();
 
 #endif

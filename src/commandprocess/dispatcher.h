@@ -54,16 +54,19 @@ extern void insertCard(	u1* imsi,
 						u1* loci,
 						u1* psloci,
 						u1* fplmn );
-extern short processSelect(u1* apdu, u1* responseBuf, u2* responseLen);
-extern short processStatus(u1* apdu, u1* responseBuf, u2* responseLen);
-extern short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen);
-extern short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen);
-extern short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen);
-extern short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen);
-extern short processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen);
-extern short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen);
-extern short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen);
-extern short processAuth(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 preCheckAPDU(u1* apdu, u2 apduLen);
+extern u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen);
+
+extern u2 processSelect(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 processStatus(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 processReadBin(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen);
+extern u2 processAuth(u1* apdu, u1* responseBuf, u2* responseLen);
 
 extern FileDesc* selectChild(FileDesc* df, u2 fid);
 extern FileDesc* selectChildDf(FileDesc* df, u2 fid);
@@ -80,8 +83,8 @@ extern FileDesc* selectChildDfSfi(FileDesc* df, u1 sfi);
 extern FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi);
 extern u1 openChannel(u1 srcChnId);
 extern u1 closeChannel(u1 sChnId);
-extern short updateBinary(FileDesc* file, u2 offset, u1* data, u1 len);
-extern short readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* responseLen);
+extern u2 updateBinary(FileDesc* file, u2 offset, u1* data, u1 len);
+extern u2 readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* responseLen);
 extern void readNextRecord(FileDesc* file, u1* responseBuf);
 extern void readPreviousRecord(FileDesc* file, u1* responseBuf);
 extern void readRecordAbs(FileDesc* file, u1 recordNum, u1* responseBuf);

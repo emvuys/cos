@@ -23,11 +23,15 @@ void insertCard(u1* imsi,
 	initAuth(ki, opc);
 }
 
-short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
-	u1 ins = getINS(apdu);
+u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen) {
+	u1 ins;
+	u2 sw, index;
 
 	PRINT_FUNC_NAME();
-	printAPDU(apdu);
+	preCheckAPDU(apdu, apduLen);
+	printAPDU();
+
+	ins = getINS();
 
 	printf("Chn: %02X\n", getCurChannelID());
 	if (getCurEF() != INVALID_FILE) {
@@ -40,36 +44,84 @@ short dispatcher(u1* apdu, u1* responseBuf, u2* responseLen) {
 		printf("CurAD: %02X\n", getCurADF()->fid);
 	}
 
-	setCurChannelID(getCLS(apdu));
+	setCurChannelID(getCLS());
 	switch (ins) {
 		case INS_SELECT:
-			return processSelect(apdu, responseBuf, responseLen);
+			sw = processSelect(apdu, responseBuf, responseLen);
+			break;
 		case INS_STATUS:
-			return processStatus(apdu, responseBuf, responseLen);
+			sw = processStatus(apdu, responseBuf, responseLen);
+			break;
 		case INS_VERIFY_PIN:
-			return processVerifyPIN(apdu, responseBuf, responseLen);
+			sw = processVerifyPIN(apdu, responseBuf, responseLen);
+			break;
 		case INS_UNBLOCK_PIN:
-			return processUnBlockPIN(apdu, responseBuf, responseLen);
+			sw = processUnBlockPIN(apdu, responseBuf, responseLen);
+			break;
 		case INS_MANAGE_CHANNEL:
-			return processManageChannel(apdu, responseBuf, responseLen);
+			sw = processManageChannel(apdu, responseBuf, responseLen);
+			break;
 		case INS_READ_BINARY:
-			return processReadBin(apdu, responseBuf, responseLen);
+			sw = processReadBin(apdu, responseBuf, responseLen);
+			break;
 		case INS_UPDATE_BINARY:
-			return processUpdateBin(apdu, responseBuf, responseLen);
+			sw = processUpdateBin(apdu, responseBuf, responseLen);
+			break;
 		case INS_READ_RECORD:
-			return processReadRecord(apdu, responseBuf, responseLen);
+			sw = processReadRecord(apdu, responseBuf, responseLen);
+			break;
 		case INS_UPDATE_RECORD:
-			return processUpdateRecord(apdu, responseBuf, responseLen);
+			sw = processUpdateRecord(apdu, responseBuf, responseLen);
+			break;
 		case INS_AUTHENTICATE:
-			return processAuth(apdu, responseBuf, responseLen);
+			sw = processAuth(apdu, responseBuf, responseLen);
+			break;
 		default:
 			PRINT_STR("Unkown command");
 			*responseLen = 0;
 			return INVALID_INS;
 	}
+	if (sw == NONE) {
+		index = *responseLen;
+		responseBuf[index ++] = sw >> 8;
+		responseBuf[index ++] = sw & 0xFF;
+		*responseLen = index;
+		return NONE;
+	}
 }
 
-short processSelect(u1* apdu, u1* responseBuf, u2* responseLen) {
+u2 preCheckAPDU(u1* apdu, u2 apduLen) {
+	if (apduLen < 4) {
+		return WRONG_LENGTH;
+	}
+	apduCommand.cla = *(apdu);
+	apduCommand.ins = *(apdu + 1);
+	apduCommand.p1 = *(apdu + 2);
+	apduCommand.p2 = *(apdu + 3);
+	apduCommand.lc = 0;
+	
+	if (apduLen == 4) {
+		return NONE;
+	}
+	if (apduLen == 5) {
+		apduCommand.lc = *(apdu + 4);
+		return NONE;
+	}
+	apduCommand.lc = *(apdu + 4);
+	if (apduLen == (apduCommand.lc + 5)) {
+		apduCommand.data = apdu + 5;
+		return NONE;
+	}
+	if (apduLen == (apduCommand.lc + 6)) {
+		apduCommand.lc = *(apdu + 4);
+		apduCommand.data = apdu + 5;
+		apduCommand.le = *(apdu + 5 + apduCommand.lc);
+		return NONE;
+	}
+	return WRONG_LENGTH;
+}
+
+u2 processSelect(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u1 needsFcp = 0, flag = 0;
 	FileDesc* file;
 	u2 sw = FILE_NOT_FOUND;
@@ -78,7 +130,7 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen) {
 
 	//printADF();
 	
-	switch ((getP2(apdu) >> 2) & 0x07) {
+	switch ((getP2() >> 2) & 0x07) {
 		case 1: 
 			needsFcp = 1;
 			break;
@@ -90,11 +142,11 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen) {
 			return WRONG_PARAMS;
         }
 
-	switch (getP1(apdu)) {
+	switch (getP1()) {
 		case 0x00: // select MF
-			if (getP3(apdu) == 0) {
+			if (getLc() == 0) {
 				file = selectFId(MF);
-			} else if (getP3(apdu) != 2) {
+			} else if (getLc() != 2) {
 				return WRONG_PARAMS;
 			} else {
 				file = selectFId(getDataShort(apdu));
@@ -107,20 +159,20 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen) {
 			file = selectParentDf(getDataShort(apdu));
 			break;
 		case 0x04: // selectbyAID
-			flag = (getP2(apdu) >> 5) & 0x03; // 2, terminate; 0, not
-			file = selectbyAID(getData(apdu), getP3(apdu), flag);
+			flag = (getP2() >> 5) & 0x03; // 2, terminate; 0, not
+			file = selectbyAID(getData(), getLc(), flag);
 			break;
 		case 0x08: //selectByPathFromMf
-			if (getP3(apdu) % 2 != 0) {
+			if (getLc() % 2 != 0) {
 				return WRONG_DATA;
 			}
-			file = selectByPathFromMf(getData(apdu), getP3(apdu));
+			file = selectByPathFromMf(getData(), getLc());
 			break;
 		case 0x09:
-			if (getP3(apdu) % 2 != 0) {
+			if (getLc() % 2 != 0) {
 				return WRONG_DATA;
 			}
-			file = selectByPathFromCurrentDf(getData(apdu), getP3(apdu));
+			file = selectByPathFromCurrentDf(getData(), getLc());
 			break;
 		default:
 			return WRONG_PARAMS;
@@ -151,14 +203,14 @@ short processSelect(u1* apdu, u1* responseBuf, u2* responseLen) {
 	return sw;
 }
 
-short processStatus(u1* apdu, u1* responseBuf, u2* responseLen) {
+u2 processStatus(u1* apdu, u1* responseBuf, u2* responseLen) {
 	FileDesc* file;
 	u2 sw = NONE;
 
-	if (getP1(apdu) != 0x00 && getP1(apdu) != 0x01 && getP1(apdu) != 0x02) {
+	if (getP1() != 0x00 && getP1() != 0x01 && getP1() != 0x02) {
 		return WRONG_PARAMS;
         }
-        switch (getP2(apdu)) {
+        switch (getP2()) {
 		case 0x00:
 			file = getCurDF();
 			getFCP(file, responseBuf);
@@ -179,12 +231,12 @@ short processStatus(u1* apdu, u1* responseBuf, u2* responseLen) {
 	}
 }
 
-short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen) {
-	if (getP1(apdu) != 0 || getP2(apdu) != 0x01) {
+u2 processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen) {
+	if (getP1() != 0 || getP2() != 0x01) {
 		return WRONG_PARAMS;
 	}
 	*responseLen = 0;
-	switch (getP3(apdu)) {
+	switch (getLc()) {
 		case 0x00:
 			return VERYFY_PIN_RETRY_LEFT_TIME;
 		case 0x08:
@@ -195,12 +247,12 @@ short processVerifyPIN(u1* apdu, u1* responseBuf, u2* responseLen) {
 	return NONE;
 }
 
-short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen) {
-	if (getP1(apdu) != 0 || getP2(apdu) != 0x01) {
+u2 processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen) {
+	if (getP1() != 0 || getP2() != 0x01) {
 		return WRONG_PARAMS;
 	}
 	*responseLen = 0;
-	switch (getP3(apdu)) {
+	switch (getLc()) {
 		case 0x00:
 			return VERYFY_PIN_RETRY_LEFT_TIME;
 		case 0x08:
@@ -211,13 +263,13 @@ short processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen) {
 	return NONE;
 }
 
-short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen) {
+u2 processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u2 sw = NONE;
 	u1 newChannel = INVALID_CHANNLE_ID;
 
-	switch (getP1(apdu) & 0xFF) {
+	switch (getP1() & 0xFF) {
 		case 0x00:
-			if (getP2(apdu) != 0x00) {
+			if (getP2() != 0x00) {
 				return WRONG_PARAMS;
 			}
 			newChannel = openChannel(getCurChannelID());
@@ -229,10 +281,10 @@ short processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen) {
 				return sw;
 			}
 		case 0x80:
-			if (getP2(apdu) == 0) {
+			if (getP2() == 0) {
 				return WRONG_PARAMS;
 			}
-			newChannel = closeChannel(getP2(apdu));
+			newChannel = closeChannel(getP2());
 			if (newChannel != RETURN_OK) {
 				return LOGICAL_CHANNEL_NOT_SUPPORTED;
 			} else {
@@ -266,16 +318,16 @@ u1 closeChannel(u1 sChnId) {
 	}
 }
 
-short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen) {
+u2 processReadBin(u1* apdu, u1* responseBuf, u2* responseLen) {
 	FileDesc* file;
 	u2 offset, len, sw = NONE;
-	u2 size = getP3(apdu) & 0xFF;
-	if ((getP1(apdu) & 0x80) == 0) {
-		offset = getP1(apdu) << 8 | getP2(apdu);
+	u2 size = getLc() & 0xFF;
+	if ((getP1() & 0x80) == 0) {
+		offset = getP1() << 8 | getP2();
 		file = getCurEF();
 	} else {
-		offset = getP2(apdu);
-		file = selectBySfi(getP1(apdu) & 0x1F);
+		offset = getP2();
+		file = selectBySfi(getP1() & 0x1F);
 	}
 	if (file == INVALID_FILE) {
 		return NO_FILE_SELECTED;
@@ -284,7 +336,7 @@ short processReadBin(u1* apdu, u1* responseBuf, u2* responseLen) {
 	return sw;
 }
 
-short readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* responseLen) {
+u2 readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* responseLen) {
 	if ((offset < 0) || (offset > 0x7FFF) ||  (offset > file->fileLen) ||(size < 0) || (size > 0x7FFF)) {
 		return WRONG_LENGTH;
 	}
@@ -298,26 +350,26 @@ short readBinary(FileDesc* file, u2 offset, u2 size, u1* responseBuf, u2* respon
 	return size;
 }
 
-short processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen) {
+u2 processUpdateBin(u1* apdu, u1* responseBuf, u2* responseLen) {
 	FileDesc* file;
 	u2 offset, len, sw = NONE;
-	u2 size = getP3(apdu) & 0xFF;
-	if ((getP1(apdu) & 0x80) == 0) {
-		offset = getP1(apdu) << 8 | getP2(apdu);
+	u2 size = getLc() & 0xFF;
+	if ((getP1() & 0x80) == 0) {
+		offset = getP1() << 8 | getP2();
 		file = getCurEF();
 	} else {
-		offset = getP2(apdu);
-		file = selectBySfi(getP1(apdu) & 0x1F);
+		offset = getP2();
+		file = selectBySfi(getP1() & 0x1F);
 	}
 	if (file == INVALID_FILE) {
 		return NO_FILE_SELECTED;
 	}
-	updateBinary(file, offset, getData(apdu), getP3(apdu));
+	updateBinary(file, offset, getData(), getLc());
 	*responseLen = 0;
 	return sw;
 }
 
-short updateBinary(FileDesc* file, u2 offset, u1* data, u1 len) {
+u2 updateBinary(FileDesc* file, u2 offset, u1* data, u1 len) {
 	u2 sw = NONE;
 	if ((offset < 0) || (offset > 0x7FFF) || (offset + len > file->fileLen)) {
 		return WRONG_LENGTH;
@@ -326,9 +378,9 @@ short updateBinary(FileDesc* file, u2 offset, u1* data, u1 len) {
 	return sw;
 }
 
-short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen) {
-	u1 number = getP1(apdu) & 0xFF;
-	u1 sfi = (getP2(apdu) >> 3) & 0x1F;
+u2 processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen) {
+	u1 number = getP1() & 0xFF;
+	u1 sfi = (getP2() >> 3) & 0x1F;
 	FileDesc* file;
 
 	if (sfi == 0) {
@@ -341,7 +393,7 @@ short processReadRecord(u1* apdu, u1* responseBuf, u2* responseLen) {
 		return NO_FILE_SELECTED;
 	}
 
-        switch (getP2(apdu) & 0x07) {
+        switch (getP2() & 0x07) {
 		case 2:
 			readNextRecord(file, responseBuf);
 			break;
@@ -395,9 +447,9 @@ void readRecordAbs(FileDesc* file, u1 recordNum, u1* responseBuf) {
 	COS_MEMCPY(responseBuf, file->data + file->recordLen * recordNum, file->recordLen);
 }
 
-short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen) {
-	u1 number = getP1(apdu) & 0xFF;
-	u1 sfi = (getP2(apdu) >> 3) & 0x1F;
+u2 processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen) {
+	u1 number = getP1() & 0xFF;
+	u1 sfi = (getP2() >> 3) & 0x1F;
 	FileDesc* file;
 	if (sfi == 0) {
 		file = getCurEF();
@@ -408,15 +460,15 @@ short processUpdateRecord(u1* apdu, u1* responseBuf, u2* responseLen) {
         if (file == INVALID_FILE) {
 		return NO_FILE_SELECTED;
         }
-        switch (getP2(apdu) & 0x07) {
+        switch (getP2() & 0x07) {
 		case 2:
-			updateNextRecord(file, getData(apdu));
+			updateNextRecord(file, getData());
 			break;
 		case 3:
-			updatePreviousRecord(file, getData(apdu));
+			updatePreviousRecord(file, getData());
 			break;
 		case 4:
-			updateRecordAbs(file, number, getData(apdu));
+			updateRecordAbs(file, number, getData());
 			break;
 		default:
 			return WRONG_PARAMS;
@@ -462,7 +514,7 @@ void updateRecordAbs(FileDesc* file, u1 recordNum, u1* apduData) {
 	COS_MEMCPY(file->data + file->recordLen * recordNum, apduData, file->recordLen);
 }
 
-short processAuth(u1* apdu, u1* responseBuf, u2* responseLen) {
+u2 processAuth(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u1 rand[16];
 	u1 authToken[16];
 	COS_MEMCPY(rand, apdu + OFFSET_DATA + 1, 16);
