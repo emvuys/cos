@@ -310,9 +310,28 @@ void configIMSI(u1* imsi) {
 }
 
 void configKI(u1* ki) {
+	u1 len = COS_STRLEN(ki);
+	if (len != 0x20) {
+		return;
+	}
+#ifdef KIOPC_FILE	
+	charString2ByteString(ki, profile->ki->data, 0, STRING_NOSPACE_NOWAPE);
+	printFileContent(profile->ki);
+#else
+	charString2ByteString(ki, AuthKi, 0, STRING_NOSPACE_NOWAPE);
+#endif
 }
 
 void configOPC(u1* opc) {
+	u1 len = COS_STRLEN(opc);
+	if (len != 0x20) {
+		return;
+	}
+#ifdef KIOPC_FILE	
+	charString2ByteString(opc, profile->opc->data + LENGTH_KI, 0, STRING_NOSPACE_NOWAPE);
+#else
+	charString2ByteString(opc, AuthOpc, 0, STRING_NOSPACE_NOWAPE);
+#endif
 }
 
 void configICCID(u1* iccid) {

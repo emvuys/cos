@@ -45,6 +45,7 @@
 #define EF_START_HFN	0x6F5B
 #define EF_THRESHOLD	0x6F5C
 #define EF_UST			0x6F38
+#define EF_KIOPC			0xA7C1
 
 #define FILE_CONTROL_PARAMETERS_TAG		0x62
 #define FILE_SIZE_TAG						0x80
@@ -58,7 +59,15 @@
 #define PIN_STATUS_TEMPLATE_DO_TAG		0xC6
 #define UICC_CHARACTERISTICS_TAG			0x80
 
+#define LENGTH_KI	0x10
+#define LENGTH_OPC	0x10
+#define LENGTH_IMSI	0x9
+
 #define PMLNS_SPLITER		(';')
+
+#define DEFAULT_IMIS			"08 29 43 05 07 59 07 50 57"
+#define DEFAULT_KI			"3C 77 B0 BB DF 8B B3 9A 94 17 5A 0D 5C 9D FE 4E"
+#define DEFAULT_OPC			"82 64 32 53 91 70 3F 4E DA AC 5C 3B 04 67 76 CB"
 
 typedef enum fileType {
 	MF,

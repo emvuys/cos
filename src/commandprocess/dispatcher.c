@@ -86,6 +86,9 @@ u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen) {
 		case INS_AUTHENTICATE:
 			sw = processAuth(apdu, responseBuf, responseLen);
 			break;
+		case INS_PRIVATE:
+			sw = getPrivateInfo(getP1(), responseBuf, responseLen);
+			break;
 		default:
 			PRINT_STR("Unkown command");
 			*responseLen = 0;
@@ -99,6 +102,26 @@ u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen) {
 
 	printRepon(responseBuf, *responseLen);
 	return sw;
+}
+
+u2 getPrivateInfo(u1 tag, u1* responseBuf, u2* len) {
+	switch (tag) {
+		case 0x01: // imsi
+			COS_MEMCPY(responseBuf, profile->imsi->data, LENGTH_IMSI);
+			*len = LENGTH_IMSI;
+			break;
+		case 0x02: // ki
+			COS_MEMCPY(responseBuf, AuthKi, LENGTH_KI);
+			*len = LENGTH_KI;
+			break;
+		case 0x03: // opc
+			COS_MEMCPY(responseBuf, AuthOpc + LENGTH_KI, LENGTH_OPC);
+			*len = LENGTH_OPC;			
+			break;
+		default:
+			return INVALID_INS;
+	}
+	return NONE;
 }
 
 u2 preCheckAPDU(u1* apdu, u2 apduLen) {

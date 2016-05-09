@@ -14,6 +14,7 @@ u2 EFs_MF[] = {
 	EF_PL,
 	EF_ARR,
 	EF_ICCID,
+	EF_KIOPC,
 	DF_TELECOM,
 	ADF_USIM
 };

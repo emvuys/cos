@@ -31,12 +31,18 @@ u1 R4 = 0x40;
 u1 R5 = 0x60;
 
 void initAuth(u1* ki, u1* opc) {
+#ifdef KIOPC_FILE
+	COS_MEMCPY(AuthKi, profile->ki->data, LENGTH_KI);
+	COS_MEMCPY(AuthOpc, profile->ki->data + LENGTH_KI, LENGTH_OPC);
+#else	
 	charString2ByteString(ki, AuthKi, 0, STRING_NOSPACE_NOWAPE);
 	charString2ByteString(opc, AuthOpc, 0, STRING_NOSPACE_NOWAPE);
+#endif
+
 #if DEBUG_LEVLE >= 2
 	printRepon(AuthKi, 16);
 	printRepon(AuthOpc, 16);
-#endif	
+#endif
 	RijndaelKeySchedule(AuthKi);
 }
 

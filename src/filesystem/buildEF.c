@@ -119,6 +119,13 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 			case EF_UST:
 				ef = creatEF_UST();
 				break;
+#ifdef KIOPC_FILE				
+			case EF_KIOPC:
+				ef = creatEF_KIOPC();
+				profile->ki = ef;
+				profile->opc = ef;
+				break;
+#endif				
 			default:
 				break;
 		}
@@ -477,7 +484,7 @@ FileDesc* creatEF_IMSI() {
 	ef->fileLen = 9;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("08 FF FF FF FF FF FF FF FF", ef->data, 0, STRING_SPACE_NOWAPE);
+	charString2ByteString(DEFAULT_IMIS, ef->data, 0, STRING_SPACE_NOWAPE);
 
 	printFileContent(ef);
 
@@ -920,4 +927,29 @@ FileDesc* creatEF_UST() {
 
 	return ef;
 }
+#ifdef KIOPC_FILE
+FileDesc* creatEF_KIOPC() {
+	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
+	u1* buf, index = 0;
+	u2 len;
+	PRINT_FUNC_NAME();
+	
+	COS_MEMSET(ef, 0, sizeof(FileDesc));
+	ef->fid = EF_KIOPC;
+	ef->shareble = SHAREABLE;
+	ef->arrRef.arrFid = 0x6F06;
+	ef->arrRef.arrRecordNum = 3;
+	ef->filetype = EF;
+	ef->eftype = TRANSPARENT;
+	ef->fileLen = 0x20; // telecom
+	ef->data = COS_MALLOC(ef->fileLen);
+	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
+	charString2ByteString(DEFAULT_KI, ef->data, 0, STRING_SPACE_NOWAPE);
+	charString2ByteString(DEFAULT_OPC, ef->data + LENGTH_KI, 0, STRING_SPACE_NOWAPE);
+
+	printFileContent(ef);
+
+	return ef;
+}
+#endif
 

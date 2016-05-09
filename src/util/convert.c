@@ -90,7 +90,7 @@ void printFileContent(FileDesc* file) {
 	u1* buff = file->data;
 	u2 length = file->fileLen;
 
-	return;
+	//return;
 	printf("Fid[%02X] ", file->fid);
 	for (i = 0; i < length; i ++) {
 		printf("%02X", *(buff + i));

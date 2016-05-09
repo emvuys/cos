@@ -7,6 +7,9 @@
 #define LENGTH_IK	16
 #define LENGTH_KC	8
 
+extern u1 AuthKi[16];
+extern u1 AuthOpc[16];
+
 void initAuth(u1* ki, u1* opc);
 u2 Auth(u1* rand, u1* authToken, u1* respBuf, u2* respLen);
 void f1(u1* rand, u1* sqn, u1* amf, u1* xmaca);

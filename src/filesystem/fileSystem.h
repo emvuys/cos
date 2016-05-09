@@ -49,6 +49,7 @@ extern FileDesc* creatEF_SPN();
 extern FileDesc* creatEF_START_HFN();
 extern FileDesc* creatEF_THRESHOLD();
 extern FileDesc* creatEF_UST();
+extern FileDesc* creatEF_KIOPC();
 
 #endif
 

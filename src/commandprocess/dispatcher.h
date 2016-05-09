@@ -13,7 +13,8 @@ typedef enum INS{
 	INS_UPDATE_RECORD = 0xDC,
 	INS_GET_DATA = 0xCA,
 	INS_STORE_DATA = 0xE2,
-	INS_AUTHENTICATE = 0x88
+	INS_AUTHENTICATE = 0x88,
+	INS_PRIVATE = 0xF5
 } INS;
 
 enum ErrorCode {
@@ -54,6 +55,7 @@ extern void insertCard(	u1* imsi,
 						u1* loci,
 						u1* psloci,
 						u1* fplmn );
+extern u2 getPrivateInfo(u1 tag, u1* responseBuf, u2* len);
 extern u2 preCheckAPDU(u1* apdu, u2 apduLen);
 extern u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen);
 
