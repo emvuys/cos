@@ -30,7 +30,7 @@ typedef struct APDU{
 	u1 p1;
 	u1 p2;
 	u1 lc;
-	u1 le;
+	u2 le;
 	u1* data;
 }APDU;
 

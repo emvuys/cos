@@ -25,7 +25,7 @@ extern u2 curChannelID;
 
 extern void initChannel();
 extern u1 getCurChannelID() ;
-extern void setCurChannelID(u1 cls);
+extern u2 setCurChannelID(u1 cls);
 extern ChannelInfo getChannelInfoFromChannelID(u1 channelID);
 extern u1 isChannelIdOpen(u1 channelId);
 extern void openChannelID(u1 channelId);

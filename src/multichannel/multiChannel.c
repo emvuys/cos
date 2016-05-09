@@ -22,8 +22,14 @@ u1 getCurChannelID() {
 	return curChannelID;
 }
 
-void setCurChannelID(u1 cls) {
-	curChannelID = cls & CHANNEL_ID_MASK;
+u2 setCurChannelID(u1 cls) {
+	u1 chn = cls & CHANNEL_ID_MASK;
+	//  TODO: select and manageChannel is allowed even ths channel is not openned.
+	if (chn !=  CHANNEL_0 && !isChannelIdOpen(cls)) {
+		return LOGICAL_CHANNEL_NOT_SUPPORTED;
+	}
+	curChannelID = chn;
+	return NONE;
 }
 
 ChannelInfo getChannelInfoFromChannelID(u1 channelID) {
@@ -75,16 +81,18 @@ void setCurADF(FileDesc* pfile) {
 }
 
 u1 getAvaibleChannlNum() {
-	u1 i;
+	u1 i = 0;
 	while (i ++ < CHANNEL_NUM) {
+#if DEBUG_LEVLE >= 2
 		printf("chn[%02d], status[%02d]\n", i -1, isChannelIdOpen(i - 1));
+#endif
 		if (isChannelIdOpen(i - 1)) {
 			continue;
 		} else {
 			break;
 		}
 	}
-	if (i == CHANNEL_NUM) {
+	if (i == (CHANNEL_NUM + 1)) {
 		return INVALID_CHANNLE_ID;
 	} else {
 		return (i - 1);

@@ -11,14 +11,14 @@ void getADFName(FileDesc* file, u1* resBuf) {
 
 void getFCP(FileDesc* file, u1* resBuf) {
 	u1 isEF = isFileEF(file);
-
+#if DEBUG_LEVLE >= 2
 	if (file != INVALID_FILE) {
 		printf("getFCP fid[%04X]\n", file->fid);
 	} else {
 		printf("getFCP INVALID_FILE\n");
 		return;
 	}
-	
+#endif	
 	setCurTLVTag(FILE_CONTROL_PARAMETERS_TAG);
 
 	setCurTLVLen(0);
@@ -248,10 +248,11 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 			break;
 		}
 	} while (index ++ < (AID_COUNT - 1));
-
+#if DEBUG_LEVLE >= 2
 	if (file != INVALID_FILE) {
 		printf("ADF found: fid[%02X]\n", file->fid);
 	}
+#endif
 	PRINT_FUNC_DONE();
 	return file;
 }

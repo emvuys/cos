@@ -123,7 +123,7 @@ void printADF() {
 void printAPDU() {
 	u2 i = 0, p3 = getLc();
 	
-	printf("APDU< %02X%02X%02X%02X%02X", 
+	printf("-> %02X%02X%02X%02X%02X", 
 		getCLS(),
 		getINS(),
 		getP1(),
@@ -131,21 +131,32 @@ void printAPDU() {
 		getLc()
 		);
 
+	switch (getINS()) {
+		case INS_MANAGE_CHANNEL:
+		case INS_STORE_DATA:
+		case INS_READ_BINARY:
+		case INS_READ_RECORD:
+			printf("\n");
+			return;
+	}
 	while (p3 --) {
 		printf("%02X",  *(getData() + (i ++)));
 	}
-	printf(" >\n");
+	if (getLe() != -1) {
+		printf("%02X", getLe());
+	}
+	printf("\n");
 }
 
 
 void printRepon(u1* resp, u2 len) {
 	u2 i = 0;
 
-	printf("$ ");
+	printf("<- ");
 	while(len --) {
 		printf("%02X",  *(resp + (i ++)));
 	}
-	printf(" $\n");
+	printf("\n");
 }
 
 void showFS() {

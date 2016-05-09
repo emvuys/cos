@@ -23,7 +23,7 @@ u1 getLc() {
 }
 
 u1 getLe() {
-	return apduCommand.le;
+	return apduCommand.le & 0xFF;
 }
 
 u1* getData() {

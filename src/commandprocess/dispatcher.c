@@ -27,12 +27,18 @@ u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen) {
 	u1 ins;
 	u2 sw, index;
 
+	*responseLen = 0;
+
 	PRINT_FUNC_NAME();
-	preCheckAPDU(apdu, apduLen);
+	sw = preCheckAPDU(apdu, apduLen);
+	if (sw != NONE) {
+		return sw;
+	}
 	printAPDU();
 
 	ins = getINS();
-
+	
+#if DEBUG_LEVLE>=2
 	printf("Chn: %02X\n", getCurChannelID());
 	if (getCurEF() != INVALID_FILE) {
 		printf("CurEF: %02X\n", getCurEF()->fid);
@@ -43,8 +49,12 @@ u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen) {
 	if (getCurADF() != INVALID_FILE) {
 		printf("CurAD: %02X\n", getCurADF()->fid);
 	}
+#endif
 
-	setCurChannelID(getCLS());
+	sw = setCurChannelID(getCLS());
+	if (sw != NONE) {
+		return sw;
+	}
 	switch (ins) {
 		case INS_SELECT:
 			sw = processSelect(apdu, responseBuf, responseLen);
@@ -81,13 +91,14 @@ u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen) {
 			*responseLen = 0;
 			return INVALID_INS;
 	}
-	if (sw == NONE) {
-		index = *responseLen;
-		responseBuf[index ++] = sw >> 8;
-		responseBuf[index ++] = sw & 0xFF;
-		*responseLen = index;
-		return NONE;
-	}
+
+	index = *responseLen;
+	responseBuf[index ++] = sw >> 8;
+	responseBuf[index ++] = sw & 0xFF;
+	*responseLen = index;
+
+	printRepon(responseBuf, *responseLen);
+	return sw;
 }
 
 u2 preCheckAPDU(u1* apdu, u2 apduLen) {
@@ -99,6 +110,7 @@ u2 preCheckAPDU(u1* apdu, u2 apduLen) {
 	apduCommand.p1 = *(apdu + 2);
 	apduCommand.p2 = *(apdu + 3);
 	apduCommand.lc = 0;
+	apduCommand.le = -1;
 	
 	if (apduLen == 4) {
 		return NONE;
@@ -115,7 +127,7 @@ u2 preCheckAPDU(u1* apdu, u2 apduLen) {
 	if (apduLen == (apduCommand.lc + 6)) {
 		apduCommand.lc = *(apdu + 4);
 		apduCommand.data = apdu + 5;
-		apduCommand.le = *(apdu + 5 + apduCommand.lc);
+		apduCommand.le = *(apdu + 5 + apduCommand.lc) & 0xFF;
 		return NONE;
 	}
 	return WRONG_LENGTH;
@@ -298,7 +310,7 @@ u2 processManageChannel(u1* apdu, u1* responseBuf, u2* responseLen) {
 u1 openChannel(u1 srcChnId) {
 	u1 desChn = getAvaibleChannlNum();
 	if (desChn == INVALID_CHANNLE_ID) {
-		return RETURN_ERR;
+		return INVALID_CHANNLE_ID;
 	}
 	if (srcChnId != CHANNEL_0) {
 		copyChannelInfo(srcChnId, desChn);
