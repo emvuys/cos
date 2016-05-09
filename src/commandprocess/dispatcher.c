@@ -116,7 +116,7 @@ u2 preCheckAPDU(u1* apdu, u2 apduLen) {
 		return NONE;
 	}
 	if (apduLen == 5) {
-		apduCommand.lc = *(apdu + 4);
+		apduCommand.le = *(apdu + 4);
 		return NONE;
 	}
 	apduCommand.lc = *(apdu + 4);
@@ -333,7 +333,7 @@ u1 closeChannel(u1 sChnId) {
 u2 processReadBin(u1* apdu, u1* responseBuf, u2* responseLen) {
 	FileDesc* file;
 	u2 offset, len, sw = NONE;
-	u2 size = getLc() & 0xFF;
+	u2 size = getLe() & 0xFF;
 	if ((getP1() & 0x80) == 0) {
 		offset = getP1() << 8 | getP2();
 		file = getCurEF();

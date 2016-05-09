@@ -265,7 +265,9 @@ void addAdfAid(u1 * aid, FileDesc* file, u1 index) {
 	aidFile[index].file = file;
 
 	PRINT_FUNC_NAME();
+#if DEBUG_LEVLE >= 2
 	printf("aid[%s], len[%02X], index[%d], fid[%02X]\n", aid, len, index, file->fid);
+#endif
 }
 
 void configureProfile(	u1* imsi,

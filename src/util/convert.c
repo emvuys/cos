@@ -71,8 +71,9 @@ u1* aidString2Buffer(u1* aid, u1* aidlen) {
 	u1 buflen = strlength / 2;
 
 	PRINT_FUNC_NAME();
+#if DEBUG_LEVLE >= 2
 	printf("aid[%s], len[%02X]\n", aid, buflen);
-	
+#endif	
 	buf = COS_MALLOC(buflen);
 
 	for (i = 0; i < strlength; i += 2) {
@@ -123,13 +124,17 @@ void printADF() {
 void printAPDU() {
 	u2 i = 0, p3 = getLc();
 	
-	printf("-> %02X%02X%02X%02X%02X", 
+	printf("-> %02X%02X%02X%02X", 
 		getCLS(),
 		getINS(),
 		getP1(),
-		getP2(),
-		getLc()
+		getP2()
 		);
+	if (getLc() != 0) {
+		printf("%02X", getLc());
+	} else {
+		printf("%02X", getLe());
+	}
 
 	switch (getINS()) {
 		case INS_MANAGE_CHANNEL:

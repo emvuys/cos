@@ -33,18 +33,20 @@ u1 R5 = 0x60;
 void initAuth(u1* ki, u1* opc) {
 	charString2ByteString(ki, AuthKi, 0, STRING_NOSPACE_NOWAPE);
 	charString2ByteString(opc, AuthOpc, 0, STRING_NOSPACE_NOWAPE);
+#if DEBUG_LEVLE >= 2
 	printRepon(AuthKi, 16);
 	printRepon(AuthOpc, 16);
+#endif	
 	RijndaelKeySchedule(AuthKi);
 }
 
 u2 Auth(u1* rand, u1* authToken, u1* respBuf, u2* respLen) {
 	u1 sqnXorAk[6], ak[6], sqn[6], amf[2], xmaca[8], maca[8];
 	u1 res[16], ck[16], ik[16], kc[8], authed, index = 0;
-
+#if DEBUG_LEVLE >= 2
 	printRepon(rand, 16);
 	printRepon(authToken, 16);
-
+#endif
 	COS_MEMCPY(sqnXorAk, authToken, 6);
 	f5(rand, ak);
 	xor(ak, sqnXorAk, sqn, 6);
