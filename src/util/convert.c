@@ -70,9 +70,9 @@ u1* aidString2Buffer(u1* aid, u1* aidlen) {
 	u1 strlength  = COS_STRLEN(aid);
 	u1 buflen = strlength / 2;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 #if DEBUG_LEVLE >= 2
-	printf("aid[%s], len[%02X]\n", aid, buflen);
+	LOGD("aid[%s], len[%02X]\n", aid, buflen);
 #endif	
 	buf = COS_MALLOC(buflen);
 
@@ -91,49 +91,52 @@ void printFileContent(FileDesc* file) {
 	u2 length = file->fileLen;
 
 	//return;
-	printf("Fid[%02X] ", file->fid);
+#if DEBUG_LEVLE >= 2
+	LOGD("Fid[%02X] ", file->fid);
 	for (i = 0; i < length; i ++) {
-		printf("%02X", *(buff + i));
+		LOGD("%02X", *(buff + i));
 	}
-	printf("\n");
+	LOGD("\n");
+#endif	
 }
 
 void printADF() {
 	u1 len, index = 0, i = 0;
-	
+#if DEBUG_LEVLE >= 2
 	len = aidFile[index].aidLen;
-	printf("len[%02X], index[%d], aidMember: ", len, index);
+	LOGD("len[%02X], index[%d], aidMember: ", len, index);
 	if (len != 0) {
 		while (len --) {
-			printf("%02X",  *(aidFile[index].aid + (i ++)));
+			LOGD("%02X",  *(aidFile[index].aid + (i ++)));
 		}
 		i = 0;
 	}
 	
 	index ++;
 	len = aidFile[index].aidLen;
-	printf("len[%02X], index[%d], aidMember: ", len, index);
+	LOGD("len[%02X], index[%d], aidMember: ", len, index);
 	if (len != 0) {
 		while (len --) {
-			printf("%02X",  *(aidFile[index].aid + (i ++)));
+			LOGD("%02X",  *(aidFile[index].aid + (i ++)));
 		}
 		i = 0;
 	}
+#endif	
 }
 
 void printAPDU() {
 	u2 i = 0, p3 = getLc();
 	
-	printf("-> %02X%02X%02X%02X", 
+	LOGD("-> %02X%02X%02X%02X", 
 		getCLS(),
 		getINS(),
 		getP1(),
 		getP2()
 		);
 	if (getLc() != 0) {
-		printf("%02X", getLc());
+		LOGD("%02X", getLc());
 	} else {
-		printf("%02X", getLe());
+		LOGD("%02X", getLe());
 	}
 
 	switch (getINS()) {
@@ -141,27 +144,27 @@ void printAPDU() {
 		case INS_STORE_DATA:
 		case INS_READ_BINARY:
 		case INS_READ_RECORD:
-			printf("\n");
+			LOGD("\n");
 			return;
 	}
 	while (p3 --) {
-		printf("%02X",  *(getData() + (i ++)));
+		LOGD("%02X",  *(getData() + (i ++)));
 	}
 	if (getLe() != -1) {
-		printf("%02X", getLe());
+		LOGD("%02X", getLe());
 	}
-	printf("\n");
+	LOGD("\n");
 }
 
 
 void printRepon(u1* resp, u2 len) {
 	u2 i = 0;
 
-	printf("<- ");
+	LOGD("<- ");
 	while(len --) {
-		printf("%02X",  *(resp + (i ++)));
+		LOGD("%02X",  *(resp + (i ++)));
 	}
-	printf("\n");
+	LOGD("\n");
 }
 
 void showFS() {
@@ -170,7 +173,7 @@ void showFS() {
 
 void showFileSystem(FileDesc* mf) {
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 
 	if (mf == INVALID_FILE) {
 		PRINT_STR("MF is INVALID_FILE");
@@ -199,15 +202,15 @@ void showChildDFEF(FileList* fileList) {
 	FileDesc* pFile;
 	FileList* pListNode = fileList;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	while (pListNode != INVALID_FILE_LIST) {
 		pFile = pListNode->me;
-		printf("fid: 0x%2X, type: %d, ", pFile->fid, pFile->filetype);
+		LOGD("fid: 0x%2X, type: %d, ", pFile->fid, pFile->filetype);
 		if (pFile->parent != INVALID_FILE) {
-			printf("parentfid: 0x%2X, type: %d\n", pFile->parent->fid, pFile->parent->filetype);
+			LOGD("parentfid: 0x%2X, type: %d\n", pFile->parent->fid, pFile->parent->filetype);
 		} else {
-			printf("parent is INVALID_FILE\n");
+			LOGD("parent is INVALID_FILE\n");
 		}
 		if ((pListNode->me->filetype == DF) || (pListNode->me->filetype == ADF)) {
 			if (pListNode->me->childDf != INVALID_FILE_LIST) {

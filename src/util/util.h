@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+//#include <Android/log.h>
+
 
 #define OFFSET_CLS	0
 #define OFFSET_INS	1
@@ -44,10 +46,23 @@ typedef struct APDU{
 
 #define DEBUG_LEVLE	1
 
+//#define ANDROID_DEBUG
+
+#ifdef ANDROID_DEBUG
+#define TAG    "myhello-jni-test"
+#define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__) // 定义LOGD类型  
+//#define LOGD_FUNC()		{LOGD(__FUNCTION__);}
+#define LOGD_FUNC()		{}
+#else
+#define LOGD printf
+#define LOGD_FUNC()		{}
+#endif
+
+
 #if DEBUG_LEVLE>=2
-#define PRINT_FUNC_NAME()	{printf("Func: ");printf(__FUNCTION__);printf("\n");}
-#define PRINT_FUNC_DONE()	{printf("Func: ");printf(__FUNCTION__);printf(" DONE\n");}
-#define PRINT_STR(s)			{printf("%s\n", s);}
+#define PRINT_FUNC_NAME()	{LOGD("Func: ");LOGD(__FUNCTION__);LOGD("\n");}
+#define PRINT_FUNC_DONE()	{LOGD("Func: ");LOGD(__FUNCTION__);LOGD(" DONE\n");}
+#define PRINT_STR(s)			{LOGD("%s\n", s);}
 #define PRINTGG()			{PRINT_STR("########");}
 #else
 #define PRINT_FUNC_NAME()	{}
@@ -55,6 +70,7 @@ typedef struct APDU{
 #define PRINT_STR(s)			{}
 #define PRINTGG()			{}
 #endif
+
 
 extern TLV* tlv;
 extern APDU apduCommand;

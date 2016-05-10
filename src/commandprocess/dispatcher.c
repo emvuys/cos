@@ -12,7 +12,7 @@ void insertCard(u1* imsi,
 				u1* loci,
 				u1* psloci,
 				u1* fplmn) {
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 
 	initADF();
 	MFRef = buildFileSystem();
@@ -29,32 +29,33 @@ u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen) {
 
 	*responseLen = 0;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	sw = preCheckAPDU(apdu, apduLen);
 	if (sw != NONE) {
-		return sw;
+		return 0;
 	}
 	printAPDU();
 
 	ins = getINS();
 	
 #if DEBUG_LEVLE>=2
-	printf("Chn: %02X\n", getCurChannelID());
+	LOGD("Chn: %02X\n", getCurChannelID());
 	if (getCurEF() != INVALID_FILE) {
-		printf("CurEF: %02X\n", getCurEF()->fid);
+		LOGD("CurEF: %02X\n", getCurEF()->fid);
 	}
 	if (getCurDF() != INVALID_FILE) {
-		printf("CurDF: %02X\n", getCurDF()->fid);
+		LOGD("CurDF: %02X\n", getCurDF()->fid);
 	}
 	if (getCurADF() != INVALID_FILE) {
-		printf("CurAD: %02X\n", getCurADF()->fid);
+		LOGD("CurAD: %02X\n", getCurADF()->fid);
 	}
 #endif
 
 	sw = setCurChannelID(getCLS());
 	if (sw != NONE) {
-		return sw;
+		return 0;
 	}
+	sw = INVALID_INS;
 	switch (ins) {
 		case INS_SELECT:
 			sw = processSelect(apdu, responseBuf, responseLen);
@@ -92,7 +93,10 @@ u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen) {
 		default:
 			PRINT_STR("Unkown command");
 			*responseLen = 0;
-			return INVALID_INS;
+			index = 0;
+			responseBuf[index ++] = sw >> 8;
+			responseBuf[index ++] = sw & 0xFF;
+			return index;
 	}
 
 	index = *responseLen;
@@ -101,7 +105,7 @@ u2 dispatcher(u1* apdu, u2 apduLen, u1* responseBuf, u2* responseLen) {
 	*responseLen = index;
 
 	printRepon(responseBuf, *responseLen);
-	return sw;
+	return index;
 }
 
 u2 getPrivateInfo(u1 tag, u1* responseBuf, u2* len) {
@@ -161,7 +165,7 @@ u2 processSelect(u1* apdu, u1* responseBuf, u2* responseLen) {
 	FileDesc* file;
 	u2 sw = FILE_NOT_FOUND;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 
 	//printADF();
 	
@@ -289,7 +293,7 @@ u2 processUnBlockPIN(u1* apdu, u1* responseBuf, u2* responseLen) {
 	*responseLen = 0;
 	switch (getLc()) {
 		case 0x00:
-			return VERYFY_PIN_RETRY_LEFT_TIME;
+			//return VERYFY_PIN_RETRY_LEFT_TIME;
 		case 0x08:
 			return UNBLOCK_PIN_RETRY_LEFT_TIME;
 		default:
@@ -568,10 +572,10 @@ FileDesc* selectBySfi(u1 sfi) {
 FileDesc* selectFId(u2 fid) {
 	FileDesc* file;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 
 #if DEBUG_LEVLE > 2	
-	printf("selecting fid [%02X]\n", fid);
+	LOGD("selecting fid [%02X]\n", fid);
 #endif
 
 	if (fid == 0x3F00) {
@@ -601,7 +605,7 @@ FileDesc* selectFId(u2 fid) {
 
 FileDesc* selectChild(FileDesc* df, u2 fid) {
 	FileDesc* file;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	file = selectChildDf(df, fid);
 	if (file == INVALID_FILE) {
@@ -612,7 +616,7 @@ FileDesc* selectChild(FileDesc* df, u2 fid) {
 
 FileDesc* selectChildSfi(FileDesc* df, u1 sfi) {
 	FileDesc* file;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	file = selectChildDfSfi(df, sfi);
 	if (file == INVALID_FILE) {
@@ -625,11 +629,10 @@ FileDesc* selectChildDf(FileDesc* df, u2 fid) {
 	FileDesc* file = INVALID_FILE;
 	FileList* curDF = df->childDf;
 
-	PRINT_FUNC_NAME()
-	
+	LOGD_FUNC();	
 	while (curDF != INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2	
-		printf("ChildDF[%02X]\n", curDF->me->fid);
+		LOGD("ChildDF[%02X]\n", curDF->me->fid);
 #endif		
 		if (curDF->me->fid == fid) {
 			file = curDF->me;
@@ -644,11 +647,11 @@ FileDesc* selectChildDfSfi(FileDesc* df, u1 sfi) {
 	FileDesc* file = INVALID_FILE;
 	FileList* curDF = df->childDf;
 
-	PRINT_FUNC_NAME()
+	LOGD_FUNC();
 	
 	while (curDF != INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2	
-		printf("ChildDF[%02X], sfi[%02X]\n", curDF->me->fid, curDF->me->sfi);
+		LOGD("ChildDF[%02X], sfi[%02X]\n", curDF->me->fid, curDF->me->sfi);
 #endif		
 		if (curDF->me->sfi == sfi) {
 			file = curDF->me;
@@ -663,11 +666,11 @@ FileDesc* selectChildEf(FileDesc* df, u2 fid) {
 	FileDesc* file = INVALID_FILE;
 	FileList* curEF = df->childEf;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	while (curEF != INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2	
-		printf("ChildEF[%02X]\n", curEF->me->fid);
+		LOGD("ChildEF[%02X]\n", curEF->me->fid);
 #endif
 		if (curEF->me->fid == fid) {
 			file = curEF->me;
@@ -682,11 +685,11 @@ FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi) {
 	FileDesc* file = INVALID_FILE;
 	FileList* curEF = df->childEf;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	while (curEF != INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2	
-		printf("ChildEF[%02X], sfi[%02X]\n", curEF->me->fid, curEF->me->sfi);
+		LOGD("ChildEF[%02X], sfi[%02X]\n", curEF->me->fid, curEF->me->sfi);
 #endif
 		if (curEF->me->sfi == sfi) {
 			file = curEF->me;
@@ -700,7 +703,7 @@ FileDesc* selectChildEfSfi(FileDesc* df, u1 sfi) {
 FileDesc* selectParentDf(u2 fid) {
 	FileDesc* file = getCurDF()->parent;
 	
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	if ((file != INVALID_FILE) && (file->fid == fid)) {
 		return file;
@@ -711,7 +714,7 @@ FileDesc* selectParentDf(u2 fid) {
 FileDesc* selectbyAID(u1* aidBuf, u1 len, u1 terminal) {
 	FileDesc* file;
 	
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	file = getAdfFileDes(aidBuf, len);
 	if (file != INVALID_FILE) {
@@ -721,12 +724,12 @@ FileDesc* selectbyAID(u1* aidBuf, u1 len, u1 terminal) {
 }
 
 FileDesc* selectByPathFromMf(u1* fidPath, u1 len) {
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	return selectByPath(getMF(), fidPath, len);
 }
 
 FileDesc* selectByPathFromCurrentDf(u1* fidPath, u1 len) {
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	return selectByPath(getCurDF(), fidPath, len);
 }
 
@@ -739,16 +742,16 @@ FileDesc* selectByPath(FileDesc* df, u1* fidPath, u1 len) {
 	u2 fid;
 	u1* pfid = fidPath;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 #if DEBUG_LEVLE > 2	
-	printf("selectByPath DF[%02X], len[%02d], step[%02d]\n", df->fid, len, step);
+	LOGD("selectByPath DF[%02X], len[%02d], step[%02d]\n", df->fid, len, step);
 #endif
 
 	while (step --) {
-		//printf("step[%02d]\n", step);
+		//LOGD("step[%02d]\n", step);
 		fid = getShort(pfid);
 #if DEBUG_LEVLE > 2	
-		printf("selectByPath fid[%02X]\n", fid);
+		LOGD("selectByPath fid[%02X]\n", fid);
 #endif
 		if (fid == 0x7FFF) {
 			file = getCurADF();

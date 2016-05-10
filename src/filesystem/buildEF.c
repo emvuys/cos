@@ -11,7 +11,7 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 	do{
 		fid = fids[index];
 #if DEBUG_LEVLE > 2	
-		printf("fid[0x%2x], idx: %d\n", fid, index);
+		LOGD("fid[0x%2x], idx: %d\n", fid, index);
 #endif
 		switch (fid) {
 			case EF_ACC:
@@ -119,13 +119,11 @@ FileDesc* buildEFs(FileDesc* parent, u2* fids, u1 len) {
 			case EF_UST:
 				ef = creatEF_UST();
 				break;
-#ifdef KIOPC_FILE				
 			case EF_KIOPC:
 				ef = creatEF_KIOPC();
 				profile->ki = ef;
 				profile->opc = ef;
-				break;
-#endif				
+				break;		
 			default:
 				break;
 		}
@@ -139,7 +137,7 @@ FileDesc* creatEF_ACC() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_ACC;
@@ -163,7 +161,7 @@ FileDesc* creatEF_ACL() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_ACL;
@@ -186,7 +184,7 @@ FileDesc* creatEF_AD() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_AD;
@@ -211,7 +209,7 @@ FileDesc* creatEF_ARR() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_ARR;
@@ -240,7 +238,7 @@ FileDesc* creatEF_ARR_SUB() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_ARR_SUB;
@@ -274,13 +272,13 @@ FileDesc* creatEF_DIR() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_DIR;
 	ef->sfi = 0x1E;
 	ef->shareble = SHAREABLE;
-	ef->arrRef.arrFid = 0x6F06;
+	ef->arrRef.arrFid = 0x2F06;
 	ef->arrRef.arrRecordNum= 1;
 	ef->filetype = EF;
 	ef->eftype = LINEAR;
@@ -301,7 +299,7 @@ FileDesc* creatEF_ECC() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_ECC;
@@ -327,7 +325,7 @@ FileDesc* creatEF_EHPLMN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_EHPLMN;
@@ -351,7 +349,7 @@ FileDesc* creatEF_EST() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_EST;
@@ -375,7 +373,7 @@ FileDesc* creatEF_FPLMN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_FPLMN;
@@ -399,7 +397,7 @@ FileDesc* creatEF_HPLMNwAcT() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_HPLMNwAcT;
@@ -423,7 +421,7 @@ FileDesc* creatEF_HPPLMN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_HPPLMN;
@@ -447,7 +445,7 @@ FileDesc* creatEF_ICCID() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_ICCID;
@@ -460,7 +458,7 @@ FileDesc* creatEF_ICCID() {
 	ef->fileLen = 10;
 	ef->data = COS_MALLOC(ef->fileLen);
 	COS_MEMSET(ef->data, 0xFF, ef->fileLen);
-	charString2ByteString("98 58 02 00 00 00 00 00 00 04", ef->data, 0, STRING_SPACE_NOWAPE);
+	charString2ByteString("98 44 05 05 12 90 75 62 18 00", ef->data, 0, STRING_SPACE_NOWAPE);
 
 	printFileContent(ef);
 
@@ -471,7 +469,7 @@ FileDesc* creatEF_IMSI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_IMSI;
@@ -495,7 +493,7 @@ FileDesc* creatEF_Kc() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_Kc;
@@ -519,7 +517,7 @@ FileDesc* creatEF_KcGPRS() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_KcGPRS;
@@ -542,7 +540,7 @@ FileDesc* creatEF_Keys() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_Keys;
@@ -567,7 +565,7 @@ FileDesc* creatEF_KeysPS() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_KeysPS;
@@ -592,7 +590,7 @@ FileDesc* creatEF_LI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_LI;
@@ -616,7 +614,7 @@ FileDesc* creatEF_LOCI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_LOCI;
@@ -640,7 +638,7 @@ FileDesc* creatEF_NETPAR() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_NETPAR;
@@ -665,7 +663,7 @@ FileDesc* creatEF_OPL() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_OPL;
@@ -691,7 +689,7 @@ FileDesc* creatEF_OPLMNwAcT() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_OPLMNwAcT;
@@ -715,7 +713,7 @@ FileDesc* creatEF_PL() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_PL;
@@ -739,7 +737,7 @@ FileDesc* creatEF_PLMNwAcT() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_PLMNwAcT;
@@ -764,7 +762,7 @@ FileDesc* creatEF_PNN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_PNN;
@@ -790,7 +788,7 @@ FileDesc* creatEF_PSLOCI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_PSLOCI;
@@ -814,7 +812,7 @@ FileDesc* creatEF_SPDI() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_SPDI;
@@ -838,7 +836,7 @@ FileDesc* creatEF_SPN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_SPN;
@@ -860,7 +858,7 @@ FileDesc* creatEF_START_HFN() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_START_HFN;
@@ -884,7 +882,7 @@ FileDesc* creatEF_THRESHOLD() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_THRESHOLD;
@@ -908,7 +906,7 @@ FileDesc* creatEF_UST() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_UST;
@@ -927,12 +925,12 @@ FileDesc* creatEF_UST() {
 
 	return ef;
 }
-#ifdef KIOPC_FILE
+
 FileDesc* creatEF_KIOPC() {
 	FileDesc* ef = COS_MALLOC(sizeof(FileDesc));
 	u1* buf, index = 0;
 	u2 len;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(ef, 0, sizeof(FileDesc));
 	ef->fid = EF_KIOPC;
@@ -951,5 +949,4 @@ FileDesc* creatEF_KIOPC() {
 
 	return ef;
 }
-#endif
 

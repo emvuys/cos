@@ -31,28 +31,29 @@ u1 R4 = 0x40;
 u1 R5 = 0x60;
 
 void initAuth(u1* ki, u1* opc) {
-#ifdef KIOPC_FILE
+	u1 kiLen = COS_STRLEN(ki);
+	u1 opcLen = COS_STRLEN(opc);
+	
 	COS_MEMCPY(AuthKi, profile->ki->data, LENGTH_KI);
 	COS_MEMCPY(AuthOpc, profile->ki->data + LENGTH_KI, LENGTH_OPC);
-#else	
-	charString2ByteString(ki, AuthKi, 0, STRING_NOSPACE_NOWAPE);
-	charString2ByteString(opc, AuthOpc, 0, STRING_NOSPACE_NOWAPE);
-#endif
-
-#if DEBUG_LEVLE >= 2
+	if (kiLen == 0x20 || opcLen == 0x20) {
+		charString2ByteString(ki, AuthKi, 0, STRING_NOSPACE_NOWAPE);
+		charString2ByteString(opc, AuthOpc, 0, STRING_NOSPACE_NOWAPE);	
+	}
+//#if DEBUG_LEVLE >= 2
 	printRepon(AuthKi, 16);
 	printRepon(AuthOpc, 16);
-#endif
+//#endif
 	RijndaelKeySchedule(AuthKi);
 }
 
 u2 Auth(u1* rand, u1* authToken, u1* respBuf, u2* respLen) {
 	u1 sqnXorAk[6], ak[6], sqn[6], amf[2], xmaca[8], maca[8];
 	u1 res[16], ck[16], ik[16], kc[8], authed, index = 0;
-#if DEBUG_LEVLE >= 2
+//#if DEBUG_LEVLE >= 2
 	printRepon(rand, 16);
 	printRepon(authToken, 16);
-#endif
+//#endif
 	COS_MEMCPY(sqnXorAk, authToken, 6);
 	f5(rand, ak);
 	xor(ak, sqnXorAk, sqn, 6);

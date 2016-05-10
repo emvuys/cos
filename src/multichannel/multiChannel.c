@@ -24,6 +24,7 @@ u1 getCurChannelID() {
 
 u2 setCurChannelID(u1 cls) {
 	u1 chn = cls & CHANNEL_ID_MASK;
+	LOGD_FUNC();
 	//  TODO: select and manageChannel is allowed even ths channel is not openned.
 	if (chn !=  CHANNEL_0 && !isChannelIdOpen(cls)) {
 		return LOGICAL_CHANNEL_NOT_SUPPORTED;
@@ -84,7 +85,7 @@ u1 getAvaibleChannlNum() {
 	u1 i = 0;
 	while (i ++ < CHANNEL_NUM) {
 #if DEBUG_LEVLE >= 2
-		printf("chn[%02d], status[%02d]\n", i -1, isChannelIdOpen(i - 1));
+		LOGD("chn[%02d], status[%02d]\n", i -1, isChannelIdOpen(i - 1));
 #endif
 		if (isChannelIdOpen(i - 1)) {
 			continue;

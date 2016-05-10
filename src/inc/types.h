@@ -23,6 +23,8 @@ typedef int s4;
 #include <stdlib.h>
 #include <string.h>
 
+//#include <Android/log.h>
+
 #include "../filesystem/file.h"
 #include "../util/util.h"
 #include "../multichannel/multiChannel.h"

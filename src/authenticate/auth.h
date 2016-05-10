@@ -1,5 +1,6 @@
 #ifndef __AUTH_H__
 #define __AUTH_H__
+#include "../inc/types.h"
 
 #define TAG_AUTH	0xDB
 #define LENGTH_RES	8

@@ -56,7 +56,7 @@ Profile* profile;
 FileDesc* buildFileSystem() {
 	FileDesc *mf, *teleDF, *adf, *phoneBook, *accessDF, *phoneBook_adf, *phoneBook_teleDF;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 
 	profile = COS_MALLOC(sizeof(Profile));
 
@@ -88,7 +88,7 @@ FileDesc* buildFileSystem() {
 
 FileDesc* buildDFADF(u2 fid) {
 	FileDesc* df;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	switch (fid) {
 		case DF_MF:
 			df = buildDF_MF();
@@ -112,12 +112,13 @@ FileDesc* buildDFADF(u2 fid) {
 
 FileDesc* buildDF_MF() {
 	FileDesc* mf = COS_MALLOC(sizeof(FileDesc));
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(mf, 0, sizeof(FileDesc));
 	mf->fid = 0x3F00;
+	mf->shareble = SHAREABLE;
 	mf->arrRef.arrFid = 0x2F06;
-	mf->arrRef.arrFid = 1;
+	mf->arrRef.arrRecordNum = 1;
 	mf->filetype = MF;
 	mf->childDf = INVALID_FILE_LIST;
 	mf->childEf = INVALID_FILE_LIST;
@@ -130,12 +131,13 @@ FileDesc* buildDF_MF() {
 
 FileDesc* buildDF_TELECOM() {
 	FileDesc* df = COS_MALLOC(sizeof(FileDesc));
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(df, 0, sizeof(FileDesc));
 	df->fid = DF_TELECOM;
+	df->shareble = SHAREABLE;
 	df->arrRef.arrFid = 0x2F06;
-	df->arrRef.arrFid = 1;
+	df->arrRef.arrRecordNum = 1;
 	df->filetype = DF;
 	df->childDf = INVALID_FILE_LIST;
 	df->childEf = INVALID_FILE_LIST;
@@ -145,12 +147,13 @@ FileDesc* buildDF_TELECOM() {
 
 FileDesc* buildDF_GSM_ACCESS() {
 	FileDesc* df = COS_MALLOC(sizeof(FileDesc));
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(df, 0, sizeof(FileDesc));
 	df->fid = DF_GSM_ACCESS;
+	df->shareble = SHAREABLE;
 	df->arrRef.arrFid = 0x2F06;
-	df->arrRef.arrFid = 1;
+	df->arrRef.arrRecordNum = 1;
 	df->filetype = DF;
 	df->childDf = INVALID_FILE_LIST;
 	df->childEf = INVALID_FILE_LIST;
@@ -160,12 +163,13 @@ FileDesc* buildDF_GSM_ACCESS() {
 
 FileDesc* buildDF_PHONEBOOK() {
 	FileDesc* df = COS_MALLOC(sizeof(FileDesc));
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(df, 0, sizeof(FileDesc));
 	df->fid = DF_PHONEBOOK;
+	df->shareble = SHAREABLE;
 	df->arrRef.arrFid = 0x2F06;
-	df->arrRef.arrFid = 1;
+	df->arrRef.arrRecordNum = 1;
 	df->filetype = DF;
 	df->childDf = INVALID_FILE_LIST;
 	df->childEf = INVALID_FILE_LIST;
@@ -175,12 +179,13 @@ FileDesc* buildDF_PHONEBOOK() {
 
 FileDesc* buildADF_USIM() {
 	FileDesc* df = COS_MALLOC(sizeof(FileDesc));
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 	
 	COS_MEMSET(df, 0, sizeof(FileDesc));
 	df->fid = ADF_USIM;
+	df->shareble = SHAREABLE;
 	df->arrRef.arrFid = 0x2F06;
-	df->arrRef.arrFid = 1;
+	df->arrRef.arrRecordNum = 1;
 	df->filetype = ADF;
 	df->childDf = INVALID_FILE_LIST;
 	df->childEf = INVALID_FILE_LIST;

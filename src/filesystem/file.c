@@ -13,9 +13,9 @@ void getFCP(FileDesc* file, u1* resBuf) {
 	u1 isEF = isFileEF(file);
 #if DEBUG_LEVLE >= 2
 	if (file != INVALID_FILE) {
-		printf("getFCP fid[%04X]\n", file->fid);
+		LOGD("getFCP fid[%04X]\n", file->fid);
 	} else {
-		printf("getFCP INVALID_FILE\n");
+		LOGD("getFCP INVALID_FILE\n");
 		return;
 	}
 #endif	
@@ -53,7 +53,7 @@ void getFileDescriptor(FileDesc* file, u1* resBuf) {
 		fileDescByte |= 1 << 6;
 	}
 	if (isEF) {
-		fileDescByte |= 1 << 3;
+		//fileDescByte |= 1 << 3; // internal file set to 1
 		switch (file->eftype) {
 			case LINEAR:
 				fileDescByte |= 1 << 1;
@@ -78,7 +78,7 @@ void getFileDescriptor(FileDesc* file, u1* resBuf) {
 		bytes[3] = file->recordLen & 0xFF;
 		bytes[4] = file->recordCnt;
 		appendTLBufferV(resBuf, FILE_DESCRIPTOR_TAG, bytes, 0, 5);
-	} else if (isEF) {
+	} else {
 		appendTLBufferV(resBuf, FILE_DESCRIPTOR_TAG, bytes, 0, 2);
 	}
 }
@@ -88,9 +88,11 @@ void getFileIdentifier(FileDesc* file, u1* resBuf) {
 }
 
 void getDFname(FileDesc* file, u1* resBuf) {
-	u1 len;
+	u1 len = 0;
 	u1* buf = getAdfAID(file, &len);
-	appendTLBufferV(resBuf, DF_NAME_TAG, buf, 0, len);
+	if (len > 0) {
+		appendTLBufferV(resBuf, DF_NAME_TAG, buf, 0, len);
+	}
 }
 
 void getProprietaryInformation(FileDesc* file, u1* resBuf) {
@@ -132,19 +134,19 @@ u1 isFileEF(FileDesc* file) {
 }
 
 void addChildEFs(FileDesc* parent, u2* fids, u2 len) {
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 #if DEBUG_LEVLE > 2	
-	printf("fid num: %d\n", len);
+	LOGD("fid num: %d\n", len);
 #endif	
 	buildEFs(parent,  fids, len);
 }
 
 void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 	FileList* p, *pNew, **pfileList;
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 
 #if DEBUG_LEVLE > 2		
-		printf("addChildFile: [0x%2X]======\n", file->fid);
+		LOGD("addChildFile: [0x%2X]======\n", file->fid);
 #endif		
 
 	file->parent = parent;
@@ -159,7 +161,7 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 		PRINT_STR("pfileList is INVALID_FILE_LIST");
 		pNew = COS_MALLOC(sizeof(FileList));
 #if DEBUG_LEVLE > 2			
-		printf("COS_MALLOC addr[0x%4X]======\n", (u4)pNew);
+		LOGD("COS_MALLOC addr[0x%4X]======\n", (u4)pNew);
 #endif		
 		COS_MEMSET(pNew, 0, sizeof(FileList));
 		pNew->me = file;
@@ -169,17 +171,17 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 		PRINT_STR("pfileList is NOT INVALID_FILE_LIST");
 		p = *pfileList;
 #if DEBUG_LEVLE > 2	
-		printf("pfileList addr[0x%4X], fid[0x%02X]======\n", (u4)p, p->me->fid);
+		LOGD("pfileList addr[0x%4X], fid[0x%02X]======\n", (u4)p, p->me->fid);
 #endif
 		while (p->next!= INVALID_FILE_LIST) {
 #if DEBUG_LEVLE > 2		
-			printf("pfileList addr next[0x%4X], fid[0x%02X]======\n", (u4)(p->next), p->me->fid);
+			LOGD("pfileList addr next[0x%4X], fid[0x%02X]======\n", (u4)(p->next), p->me->fid);
 #endif
 			p = p->next;
 		}
 		pNew = COS_MALLOC(sizeof(FileList));
 #if DEBUG_LEVLE > 2		
-		printf("COS_MALLOC addr[0x%4X]======\n", (u4)pNew);
+		LOGD("COS_MALLOC addr[0x%4X]======\n", (u4)pNew);
 #endif
 		COS_MEMSET(pNew, 0, sizeof(FileList));
 		pNew->me = file;
@@ -190,20 +192,25 @@ void addChildFile(FileDesc* parent, FileDesc* file, u1 fileType) {
 
 void initADF() {
 	u1 i = 0;
-	while (i ++ < AID_COUNT) {
-		aidFile[i].aid = NULL;
+	while (i < AID_COUNT) {
+		aidFile[i].aid = (u1*)NULL;
 		aidFile[i].aidLen = 0;
 		aidFile[i].file = INVALID_FILE;
+		i ++;
 	}
 }
 
 u1* getAdfAID(FileDesc* file, u1* aidLen) {
 	u1 i = 0;
-	while (i ++ < sizeof(aidFile)) {
+	while (i < sizeof(aidFile)) {
+		if (aidFile[i].file != INVALID_FILE) {
+			printf("aid fid[%02X]\n", aidFile[i].file->fid);
+		}
 		if (file == aidFile[i].file) {
 			*aidLen = aidFile[i].aidLen;
 			return aidFile[i].aid;
 		}
+		i ++;
 	}
 	return NULL;
 }
@@ -212,14 +219,14 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 	FileDesc* file = INVALID_FILE;
 	u1 index = 0, i = 0, len = aidLen;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 
 #if DEBUG_LEVLE > 2	
-	printf("len[%02X], aid: ", len);
+	LOGD("len[%02X], aid: ", len);
 	while (len --) {
-		printf("%02X",  *(aid + (i ++)));
+		LOGD("%02X",  *(aid + (i ++)));
 	}
-	printf("\n");
+	LOGD("\n");
 	i = 0;
 #endif
 
@@ -227,18 +234,18 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 #if DEBUG_LEVLE > 2		
 		len = aidFile[index].aidLen;
 		if (aidFile[index].file != INVALID_FILE) {
-			printf("len[%02X], index[%d], fid[%02X], aidMember: ", len, index,  aidFile[index].file->fid);
+			LOGD("len[%02X], index[%d], fid[%02X], aidMember: ", len, index,  aidFile[index].file->fid);
 		} else {
-			printf("len[%02X], index[%d], aidMember: ", len, index);
+			LOGD("len[%02X], index[%d], aidMember: ", len, index);
 		}
 		if (len != 0) {
 			i = 0;
 			while (len --) {
-				printf("%02X",  *(aidFile[index].aid + (i ++)));
+				LOGD("%02X",  *(aidFile[index].aid + (i ++)));
 			}
 			i = 0;
 		}
-		printf("\n");
+		LOGD("\n");
 #endif
 		if ((aidFile[index].aidLen != 0) &&
 			(aidFile[index].aidLen == aidLen) && 
@@ -250,7 +257,7 @@ FileDesc* getAdfFileDes(u1* aid, u1 aidLen) {
 	} while (index ++ < (AID_COUNT - 1));
 #if DEBUG_LEVLE >= 2
 	if (file != INVALID_FILE) {
-		printf("ADF found: fid[%02X]\n", file->fid);
+		LOGD("ADF found: fid[%02X]\n", file->fid);
 	}
 #endif
 	PRINT_FUNC_DONE();
@@ -264,9 +271,9 @@ void addAdfAid(u1 * aid, FileDesc* file, u1 index) {
 	aidFile[index].aidLen = len;
 	aidFile[index].file = file;
 
-	PRINT_FUNC_NAME();
+	LOGD_FUNC();
 #if DEBUG_LEVLE >= 2
-	printf("aid[%s], len[%02X], index[%d], fid[%02X]\n", aid, len, index, file->fid);
+	LOGD("aid[%s], len[%02X], index[%d], fid[%02X]\n", aid, len, index, file->fid);
 #endif
 }
 
@@ -314,12 +321,9 @@ void configKI(u1* ki) {
 	if (len != 0x20) {
 		return;
 	}
-#ifdef KIOPC_FILE	
 	charString2ByteString(ki, profile->ki->data, 0, STRING_NOSPACE_NOWAPE);
 	printFileContent(profile->ki);
-#else
 	charString2ByteString(ki, AuthKi, 0, STRING_NOSPACE_NOWAPE);
-#endif
 }
 
 void configOPC(u1* opc) {
@@ -327,11 +331,8 @@ void configOPC(u1* opc) {
 	if (len != 0x20) {
 		return;
 	}
-#ifdef KIOPC_FILE	
 	charString2ByteString(opc, profile->opc->data + LENGTH_KI, 0, STRING_NOSPACE_NOWAPE);
-#else
 	charString2ByteString(opc, AuthOpc, 0, STRING_NOSPACE_NOWAPE);
-#endif
 }
 
 void configICCID(u1* iccid) {
