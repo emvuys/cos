@@ -37,8 +37,10 @@ void initAuth(u1* ki, u1* opc) {
 	COS_MEMCPY(AuthKi, profile->ki->data, LENGTH_KI);
 	COS_MEMCPY(AuthOpc, profile->ki->data + LENGTH_KI, LENGTH_OPC);
 	if (kiLen == 0x20 || opcLen == 0x20) {
+		charString2ByteString(ki, profile->ki->data, 0, STRING_NOSPACE_NOWAPE);
+		charString2ByteString(opc, profile->ki->data + LENGTH_KI, 0, STRING_NOSPACE_NOWAPE);	
 		charString2ByteString(ki, AuthKi, 0, STRING_NOSPACE_NOWAPE);
-		charString2ByteString(opc, AuthOpc, 0, STRING_NOSPACE_NOWAPE);	
+		charString2ByteString(opc, AuthOpc, 0, STRING_NOSPACE_NOWAPE);
 	}
 //#if DEBUG_LEVLE >= 2
 	printRepon(AuthKi, 16);
