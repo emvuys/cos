@@ -36,7 +36,7 @@ void initAuth(u1* ki, u1* opc) {
 	
 	COS_MEMCPY(AuthKi, profile->ki->data, LENGTH_KI);
 	COS_MEMCPY(AuthOpc, profile->ki->data + LENGTH_KI, LENGTH_OPC);
-	if (kiLen == 0x20 || opcLen == 0x20) {
+	if (kiLen == 0x20 && opcLen == 0x20) {
 		charString2ByteString(ki, profile->ki->data, 0, STRING_NOSPACE_NOWAPE);
 		charString2ByteString(opc, profile->ki->data + LENGTH_KI, 0, STRING_NOSPACE_NOWAPE);	
 		charString2ByteString(ki, AuthKi, 0, STRING_NOSPACE_NOWAPE);
@@ -46,7 +46,7 @@ void initAuth(u1* ki, u1* opc) {
 	printRepon(AuthKi, 16);
 	printRepon(AuthOpc, 16);
 //#endif
-	RijndaelKeySchedule(AuthKi);
+	//RijndaelKeySchedule(AuthKi);
 }
 
 u2 Auth(u1* rand, u1* authToken, u1* respBuf, u2* respLen) {

@@ -119,7 +119,7 @@ u2 getPrivateInfo(u1 tag, u1* responseBuf, u2* len) {
 			*len = LENGTH_KI;
 			break;
 		case 0x03: // opc
-			COS_MEMCPY(responseBuf, AuthOpc + LENGTH_KI, LENGTH_OPC);
+			COS_MEMCPY(responseBuf, AuthOpc, LENGTH_OPC);
 			*len = LENGTH_OPC;			
 			break;
 		default:
@@ -556,6 +556,7 @@ void updateRecordAbs(FileDesc* file, u1 recordNum, u1* apduData) {
 u2 processAuth(u1* apdu, u1* responseBuf, u2* responseLen) {
 	u1 rand[16];
 	u1 authToken[16];
+	RijndaelKeySchedule(AuthKi);
 	COS_MEMCPY(rand, apdu + OFFSET_DATA + 1, 16);
 	COS_MEMCPY(authToken, apdu + OFFSET_DATA + 18, 16);	
 	return Auth(rand, authToken, responseBuf, responseLen);

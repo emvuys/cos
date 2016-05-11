@@ -331,7 +331,7 @@ void configOPC(u1* opc) {
 	if (len != 0x20) {
 		return;
 	}
-	charString2ByteString(opc, profile->opc->data + LENGTH_KI, 0, STRING_NOSPACE_NOWAPE);
+	charString2ByteString(opc, profile->ki->data + LENGTH_KI, 0, STRING_NOSPACE_NOWAPE);
 	charString2ByteString(opc, AuthOpc, 0, STRING_NOSPACE_NOWAPE);
 }
 
