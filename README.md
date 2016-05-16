@@ -1,2 +1,2 @@
 # cos
-C edition vcos
+C edition vcos, including filesystem, Millenage and multichannel.
